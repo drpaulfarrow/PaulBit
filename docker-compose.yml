@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  # Nginx edge gateway - entry point for all traffic
+  edge:
+    image: nginx:alpine
+    container_name: tollbit-edge
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./edge/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - edge-worker
+    networks:
+      - tollbit-network
+
+  # Edge worker - bot detection and routing logic
+  edge-worker:
+    build: ./edge-worker
+    container_name: tollbit-edge-worker
+    environment:
+      - NODE_ENV=development
+      - LICENSING_API_URL=http://licensing-api:3000
+      - PUBLISHER_A_URL=http://publisher-a:8081
+      - PUBLISHER_B_URL=http://publisher-b:8082
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - licensing-api
+      - redis
+    networks:
+      - tollbit-network
+
+  # Licensing API - authentication, tokens, metering, policies
+  licensing-api:
+    build: ./licensing-api
+    container_name: tollbit-licensing-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://tollbit:tollbit123@postgres:5432/tollbit
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your-secret-key-change-in-production
+      - JWT_ISSUER=gatehouse-licensing
+      - JWT_AUDIENCE=gatehouse-edge
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - tollbit-network
+
+  # Publisher A - mock content site
+  publisher-a:
+    build: ./publisher-a
+    container_name: tollbit-publisher-a
+    networks:
+      - tollbit-network
+
+  # Publisher B - mock content site
+  publisher-b:
+    build: ./publisher-b
+    container_name: tollbit-publisher-b
+    networks:
+      - tollbit-network
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    container_name: tollbit-postgres
+    environment:
+      - POSTGRES_DB=tollbit
+      - POSTGRES_USER=tollbit
+      - POSTGRES_PASSWORD=tollbit123
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - tollbit-network
+
+  # Redis for rate limiting and token cache
+  redis:
+    image: redis:7-alpine
+    container_name: tollbit-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - tollbit-network
+
+  # Publisher Dashboard - UI for managing policies and viewing analytics
+  publisher-dashboard:
+    build: ./publisher-dashboard
+    container_name: tollbit-publisher-dashboard
+    ports:
+      - "5173:5173"
+    depends_on:
+      - licensing-api
+    networks:
+      - tollbit-network
+
+  # URL-to-Markdown Parser - grounding API for search/copilot systems
+  url-parser:
+    build: ./Simple Parser/url-to-markdown
+    container_name: tollbit-url-parser
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - CORS_ORIGINS=http://localhost:5173
+    networks:
+      - tollbit-network
+
+networks:
+  tollbit-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

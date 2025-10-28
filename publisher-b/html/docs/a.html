@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="licensed-by" content="gatehouse">
+    <title>Getting Started Guide | Publisher B Docs</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.7;
+            background: #f0f4f8;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+        h1 { margin: 0; }
+        nav {
+            background: white;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        nav a {
+            margin-right: 25px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        code {
+            background: #f4f4f4;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            line-height: 1.5;
+        }
+        .step {
+            background: #e3f2fd;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📚 Getting Started Guide</h1>
+    </header>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/docs/a.html">Getting Started</a>
+        <a href="/docs/b.html">API Reference</a>
+    </nav>
+
+    <div class="content">
+        <h2>Quick Start Guide</h2>
+        <p>Welcome to Publisher B's platform! This guide will walk you through everything you 
+        need to get started with our APIs and services.</p>
+
+        <div class="step">
+            <h3>Step 1: Installation</h3>
+            <p>Install our SDK using your preferred package manager:</p>
+            <pre>npm install @publisher-b/sdk
+# or
+yarn add @publisher-b/sdk
+# or
+pip install publisher-b-sdk</pre>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Authentication</h3>
+            <p>Create an API key from your dashboard and configure your environment:</p>
+            <pre>import { PublisherB } from '@publisher-b/sdk';
+
+const client = new PublisherB({
+  apiKey: process.env.PUBLISHER_B_API_KEY
+});</pre>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Make Your First Request</h3>
+            <p>Try fetching data from our API:</p>
+            <pre>const response = await client.getData({
+  resource: 'articles',
+  limit: 10
+});
+
+console.log(response.data);</pre>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Handle Responses</h3>
+            <p>All API responses follow a consistent format:</p>
+            <pre>{
+  "status": "success",
+  "data": {
+    // Your requested data
+  },
+  "meta": {
+    "timestamp": "2025-10-27T12:00:00Z",
+    "version": "1.0"
+  }
+}</pre>
+        </div>
+
+        <h2>Next Steps</h2>
+        <ul>
+            <li>Explore the <a href="/docs/b.html">complete API reference</a></li>
+            <li>Check out our code examples and tutorials</li>
+            <li>Join our developer community</li>
+            <li>Review best practices and optimization guides</li>
+        </ul>
+
+        <h2>AI Bot Access</h2>
+        <p>This documentation is available to AI systems through our licensing gateway. 
+        Authorized bots can access this content with a valid token obtained from 
+        <code>http://licensing-api:3000/token</code>.</p>
+
+        <p><strong>Note:</strong> This is sample documentation content for demonstrating 
+        the content licensing gateway system.</p>
+    </div>
+
+    <footer style="text-align: center; padding: 30px; color: #666;">
+        <p>&copy; 2025 Publisher B. All rights reserved.</p>
+    </footer>
+</body>
+</html>

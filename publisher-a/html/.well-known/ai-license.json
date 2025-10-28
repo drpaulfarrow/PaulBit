@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "policy": "http://licensing-api:3000/policies/site-a",
+  "contact": "mailto:rights@site-a.local",
+  "training_allowed": false,
+  "inference_pricing": {
+    "price_per_fetch": 0.002,
+    "currency": "USD"
+  },
+  "redirect_url": "http://licensing-api:3000/authorize",
+  "description": "AI licensing policy for Publisher A content"
+}

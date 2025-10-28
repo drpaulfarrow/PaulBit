@@ -1,0 +1,26 @@
+{
+  "name": "url-to-markdown",
+  "version": "0.1.0",
+  "description": "Service: fetch a URL and convert HTML to Markdown",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest --runInBand"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@mozilla/readability": "^0.4.0",
+    "axios": "^1.5.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.8.0",
+    "helmet": "^6.0.0",
+    "jsdom": "^22.1.0",
+    "turndown": "^7.1.1"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "supertest": "^6.3.3"
+  }
+}

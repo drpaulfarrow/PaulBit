@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "policy": "http://licensing-api:3000/policies/site-b",
+  "contact": "mailto:rights@site-b.local",
+  "training_allowed": true,
+  "inference_pricing": {
+    "price_per_fetch": 0.001,
+    "currency": "USD"
+  },
+  "training_pricing": {
+    "price_per_fetch": 0.005,
+    "currency": "USD"
+  },
+  "redirect_url": "http://licensing-api:3000/authorize",
+  "description": "AI licensing policy for Publisher B documentation"
+}

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="licensed-by" content="gatehouse">
+    <title>Technical Deep Dive: Content Gating at the Edge | Publisher A</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #fafafa;
+        }
+        header {
+            background: #34495e;
+            color: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        h1 { margin: 0; }
+        nav {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        nav a {
+            margin-right: 20px;
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        article {
+            background: white;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .meta {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>💻 Publisher A Tech</h1>
+    </header>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/news/foo.html">Latest News</a>
+        <a href="/tech/bar.html">Tech</a>
+    </nav>
+
+    <article>
+        <h2>Technical Deep Dive: Content Gating at the Edge</h2>
+        <div class="meta">
+            <strong>By:</strong> Alex Developer | 
+            <strong>Published:</strong> October 27, 2025, 2:00 PM | 
+            <strong>Category:</strong> Technology
+        </div>
+        
+        <div class="content">
+            <p>The architecture behind modern content licensing for AI systems is deceptively simple 
+            yet remarkably powerful. Let's explore how edge-based gating works and why it's the right 
+            approach for this problem.</p>
+
+            <h3>Why the Edge?</h3>
+            
+            <p>Traditional approaches to bot detection happen at the origin server—but this has 
+            significant drawbacks. By the time a request reaches your application server, you've 
+            already spent compute resources, database connections, and bandwidth.</p>
+
+            <p>Edge-based solutions intercept requests before they consume these resources. Using 
+            a lightweight worker (Node.js, Cloudflare Workers, etc.) in front of your origin, you 
+            can make routing decisions with millisecond latency.</p>
+
+            <h3>Detection Strategy</h3>
+
+            <p>The system uses a multi-faceted detection approach:</p>
+            
+            <ul>
+                <li><strong>User-Agent matching:</strong> Pattern-based identification of known AI crawlers</li>
+                <li><strong>Rate limiting:</strong> Redis-backed sliding windows to detect suspicious patterns</li>
+                <li><strong>Token validation:</strong> JWT-based authentication for licensed access</li>
+            </ul>
+
+            <pre>// Simple bot detection
+const BOT_PATTERNS = [
+  /GPTBot/i,
+  /ClaudeBot/i,
+  /Perplexity/i
+];
+
+function isBot(userAgent) {
+  return BOT_PATTERNS.some(p => p.test(userAgent));
+}</pre>
+
+            <h3>Token Lifecycle</h3>
+
+            <p>When a bot requests access, it's redirected to a licensing gateway that issues 
+            short-lived JWTs (typically 10 minutes). These tokens contain:</p>
+
+            <ul>
+                <li>Publisher ID and URL binding</li>
+                <li>Purpose (training vs. inference)</li>
+                <li>Client identification</li>
+                <li>Pricing tier metadata</li>
+            </ul>
+
+            <p>The token is verified on subsequent requests using a combination of cryptographic 
+            signature validation and Redis allowlist checks. This dual approach ensures both 
+            security and instant revocation capability.</p>
+
+            <h3>Metering and Usage</h3>
+
+            <p>Every authorized bot access is logged to a PostgreSQL database with microsecond 
+            precision. Events include:</p>
+
+            <pre>usage_events:
+  - timestamp
+  - publisher_id
+  - client_id
+  - url
+  - cost_micro (in millionths of USD)
+  - purpose
+  - token_id</pre>
+
+            <p>This granular data enables sophisticated billing models, analytics, and compliance 
+            reporting.</p>
+
+            <h3>Performance Characteristics</h3>
+
+            <p>The edge worker adds minimal latency—typically under 5ms for cached policy lookups. 
+            For token verification, the system achieves:</p>
+
+            <ul>
+                <li>P50: 3ms</li>
+                <li>P95: 12ms</li>
+                <li>P99: 28ms</li>
+            </ul>
+
+            <p>Human traffic sees no added latency as it bypasses the licensing logic entirely.</p>
+
+            <h3>Scaling Considerations</h3>
+
+            <p>The architecture is horizontally scalable. Edge workers are stateless and can be 
+            replicated across multiple regions. Redis provides sub-millisecond rate limit checks, 
+            and PostgreSQL handles usage logging asynchronously to avoid blocking request paths.</p>
+
+            <p>For production deployments at scale, consider:</p>
+
+            <ul>
+                <li>Multi-region Redis clusters with replication</li>
+                <li>TimescaleDB for time-series usage data</li>
+                <li>CDN integration for policy caching</li>
+                <li>Async event processing for heavy analytics</li>
+            </ul>
+
+            <h3>Conclusion</h3>
+
+            <p>Edge-based content gating represents an elegant solution to a complex problem. By 
+            intercepting requests early, enforcing policies consistently, and metering access 
+            transparently, publishers gain control without compromising performance or user experience.</p>
+
+            <p>The open-source educational MVP demonstrates these principles in a deployable format. 
+            Production implementations would add additional layers of security, monitoring, and 
+            integration with existing CDN infrastructure.</p>
+        </div>
+    </article>
+
+    <footer style="text-align: center; padding: 20px; color: #666;">
+        <p>&copy; 2025 Publisher A. All rights reserved.</p>
+    </footer>
+</body>
+</html>

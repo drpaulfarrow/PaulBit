@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Publisher Dashboard</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@18?dev=false",
+          "react-dom": "https://esm.sh/react-dom@18?dev=false",
+          "react-dom/client": "https://esm.sh/react-dom@18/client?dev=false",
+          "react/jsx-runtime": "https://esm.sh/react@18/jsx-runtime?dev=false"
+        }
+      }
+    </script>
+  <!-- Tailwind CDN to ensure full utility set while we stabilize build-time extraction -->
+  <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Provide React and ReactDOM as globals for any classic JSX transforms that expect window.React/window.ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
