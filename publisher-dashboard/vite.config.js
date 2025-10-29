@@ -7,12 +7,11 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      // Externalize React so runtime imports are resolved via the import map in index.html
       external: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'],
     },
   },
   server: {
-    host: process.env.HOST || 'localhost', // 👈 '0.0.0.0' in Azure, 'localhost' locally
-    port: process.env.PORT ? Number(process.env.PORT) : 5173,
+    host: process.env.HOST || 'localhost',  // 👈 0.0.0.0 on Azure, localhost locally
+    port: process.env.PORT ? Number(process.env.PORT) : 5173, // 👈 Azure injects PORT=80 or 5173
   },
 })
