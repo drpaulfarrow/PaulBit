@@ -3,13 +3,15 @@ import { useState, useEffect } from 'react';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import PolicyEditor from './pages/PolicyEditor';
-import PolicyEditorNew from './pages/PolicyEditorNew';
-import Analytics from './pages/Analytics';
 import UsageLogs from './pages/UsageLogs';
 import Grounding from './pages/Grounding';
 import UrlLibrary from './pages/UrlLibrary';
-import PolicyTester from './pages/PolicyTester';
+import LicenseWizard from './pages/LicenseWizard';
+import AccessConfiguration from './pages/AccessConfiguration';
+import PartnerStrategies from './pages/PartnerStrategies';
+import ActiveNegotiations from './pages/ActiveNegotiations';
+import NegotiationDetail from './pages/NegotiationDetail';
+import Notifications from './pages/Notifications';
 import './index.css';
 
 function App() {
@@ -48,15 +50,18 @@ function App() {
     <BrowserRouter>
       <Layout publisherId={publisherId} onLogout={handleLogout}>
         <Routes>
-          <Route path="/" element={<Dashboard publisherId={publisherId} />} />
-          <Route path="/policy" element={<PolicyEditorNew publisherId={publisherId} />} />
-          <Route path="/policy-legacy" element={<PolicyEditor publisherId={publisherId} />} />
-          <Route path="/analytics" element={<Analytics publisherId={publisherId} />} />
-          <Route path="/logs" element={<UsageLogs publisherId={publisherId} />} />
-          <Route path="/grounding" element={<Grounding />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard publisherId={publisherId} />} />
           <Route path="/urls" element={<UrlLibrary />} />
-          <Route path="/test" element={<PolicyTester />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/licenses" element={<LicenseWizard publisherId={publisherId} />} />
+          <Route path="/access" element={<AccessConfiguration publisherId={publisherId} />} />
+          <Route path="/grounding" element={<Grounding />} />
+          <Route path="/notifications" element={<Notifications publisherId={publisherId} />} />
+          <Route path="/negotiations" element={<ActiveNegotiations publisherId={publisherId} />} />
+          <Route path="/negotiations/:id" element={<NegotiationDetail />} />
+          <Route path="/negotiations/strategy" element={<PartnerStrategies publisherId={publisherId} />} />
+          <Route path="/logs" element={<UsageLogs publisherId={publisherId} />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Layout>
     </BrowserRouter>

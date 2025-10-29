@@ -13,7 +13,7 @@ export default function Login({ onLogin }) {
 
     try {
       // Verify publisher exists
-  const response = await axios.get(`/api/policies/${publisherId}`);
+  const response = await axios.get(`/policies/${publisherId}`);
       if (response.data) {
         onLogin(parseInt(publisherId));
       }
@@ -47,6 +47,7 @@ export default function Login({ onLogin }) {
             >
               <option value="1">Publisher A (ID: 1)</option>
               <option value="2">Publisher B (ID: 2)</option>
+              <option value="4">Wikipedia (ID: 4)</option>
             </select>
           </div>
 

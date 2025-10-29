@@ -1,0 +1,29 @@
+{
+  "urlPattern": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+  "name": "Wikipedia AI Article Policy",
+  "description": "Page-specific policy for Wikipedia AI article - allows GPTBot for inference only",
+  "policy": {
+    "default": {
+      "allow": false,
+      "price_per_fetch": 0
+    },
+    "rules": [
+      {
+        "agent": "gptbot",
+        "allow": true,
+        "price_per_fetch": 0.001,
+        "purpose": ["inference"],
+        "license_type": 1,
+        "max_word_count": null,
+        "attribution_required": true
+      },
+      {
+        "agent": "claudebot",
+        "allow": false,
+        "price_per_fetch": 0,
+        "purpose": [],
+        "license_type": 0
+      }
+    ]
+  }
+}

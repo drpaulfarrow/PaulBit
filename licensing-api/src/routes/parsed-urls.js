@@ -3,6 +3,67 @@ const db = require('../db');
 const router = express.Router();
 
 /**
+ * POST /parsed-urls
+ * 
+ * Manually add a URL to the library (without parsing)
+ * 
+ * Body:
+ * - url: the URL to add (required)
+ * - title: optional title
+ * - description: optional description
+ */
+router.post('/parsed-urls', async (req, res) => {
+  try {
+    const { url, title, description } = req.body;
+
+    if (!url) {
+      return res.status(400).json({
+        success: false,
+        error: 'URL is required'
+      });
+    }
+
+    // Extract domain from URL
+    let domain;
+    try {
+      const urlObj = new URL(url);
+      domain = urlObj.hostname;
+    } catch (err) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid URL format'
+      });
+    }
+
+    // Insert or update the URL
+    const result = await db.query(`
+      INSERT INTO parsed_urls (url, domain, title, description, parse_count, last_status)
+      VALUES ($1, $2, $3, $4, 0, 'not_parsed')
+      ON CONFLICT (url) 
+      DO UPDATE SET 
+        title = COALESCE($3, parsed_urls.title),
+        description = COALESCE($4, parsed_urls.description),
+        last_parsed_at = CURRENT_TIMESTAMP
+      RETURNING *
+    `, [url, domain, title, description]);
+
+    res.json({
+      success: true,
+      message: 'URL added to library',
+      url: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('Error adding URL:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to add URL',
+      message: error.message
+    });
+  }
+});
+
+/**
  * GET /parsed-urls
  * 
  * List all parsed URLs in the user's library
@@ -26,8 +87,8 @@ router.get('/parsed-urls', async (req, res) => {
       sortOrder = 'desc'
     } = req.query;
 
-    // Build query
-    let query = 'SELECT * FROM parsed_urls WHERE 1=1';
+    // Build query - exclude content field (metadata only for URL library)
+    let query = 'SELECT id, url, domain, title, description, first_parsed_at, last_parsed_at, parse_count, last_status, metadata, created_at FROM parsed_urls WHERE 1=1';
     const params = [];
     let paramIndex = 1;
 
@@ -60,6 +121,50 @@ router.get('/parsed-urls', async (req, res) => {
 
     const result = await db.query(query, params);
 
+    // Enrich each URL with policy information
+    const enrichedUrls = await Promise.all(result.rows.map(async (url) => {
+      try {
+        // Extract domain from URL
+        const urlObj = new URL(url.url);
+        const hostname = urlObj.hostname;
+
+        // Check for page-specific policy (exact URL match)
+        const pagePolicy = await db.query(
+          'SELECT id, name FROM policies WHERE url_pattern = $1',
+          [url.url]
+        );
+
+        // Check for default policy (by hostname)
+        const defaultPolicy = await db.query(`
+          SELECT p.id, p.name, pub.hostname 
+          FROM policies p
+          JOIN publishers pub ON p.publisher_id = pub.id
+          WHERE pub.hostname = $1 AND p.url_pattern IS NULL
+        `, [hostname]);
+
+        // Build metadata
+        const metadata = {
+          hasPageSpecificPolicy: pagePolicy.rows.length > 0,
+          pageSpecificPolicyName: pagePolicy.rows[0]?.name || null,
+          hasDefaultPolicy: defaultPolicy.rows.length > 0,
+          defaultPolicyName: defaultPolicy.rows[0]?.name || null,
+          licenseStatus: pagePolicy.rows.length > 0 ? 'licensed' : 
+                        defaultPolicy.rows.length > 0 ? 'licensed' : 'no_policy'
+        };
+
+        return {
+          ...url,
+          metadata
+        };
+      } catch (err) {
+        console.error('Error enriching URL:', url.url, err);
+        return {
+          ...url,
+          metadata: { licenseStatus: 'unknown' }
+        };
+      }
+    }));
+
     // Get total count
     let countQuery = 'SELECT COUNT(*) FROM parsed_urls WHERE 1=1';
     const countParams = [];
@@ -81,7 +186,7 @@ router.get('/parsed-urls', async (req, res) => {
 
     res.json({
       success: true,
-      urls: result.rows,
+      urls: enrichedUrls,
       pagination: {
         total: totalCount,
         limit: parseInt(limit),

@@ -1,0 +1,25 @@
+{
+  "policy": {
+    "default": {
+      "allow": true,
+      "price_per_fetch": 0.001
+    },
+    "rules": [
+      {
+        "agent": "gptbot",
+        "allow": true,
+        "price_per_fetch": 0.005,
+        "purpose": []
+      },
+      {
+        "agent": "claudebot",
+        "allow": true,
+        "price_per_fetch": 0.003,
+        "purpose": []
+      }
+    ]
+  },
+  "urlPattern": "https://www.bbc.co.uk/news/articles/cq503p7yjypo",
+  "name": "Premium Pricing",
+  "description": "GPTBot $0.005, ClaudeBot $0.003, Others $0.001"
+}

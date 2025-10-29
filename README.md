@@ -15,7 +15,7 @@ This system demonstrates three core flows:
 ```
            ┌────────────────────────────┐
            │  Mock CDN / Edge Gateway   │  (Nginx + Edge Worker)
-Request ──▶│  • Bot detect (UA/IP/Rate) │──┐
+Request -->│  • Bot detect (UA/IP/Rate) │──┐
            │  • Policy lookup cache     │  │   If AI/bot:
            │  • 302 redirect or proxy   │  │   302 → /authorize
            └───────────┬────────────────┘  │

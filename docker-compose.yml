@@ -113,6 +113,33 @@ services:
     networks:
       - tollbit-network
 
+  # Negotiation Agent - AI-to-AI autonomous license negotiation
+  negotiation-agent:
+    build: ./negotiation-agent
+    container_name: tollbit-negotiation-agent
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=tollbit
+      - POSTGRES_USER=tollbit
+      - POSTGRES_PASSWORD=tollbit123
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - LOG_LEVEL=info
+      - START_MCP=false
+    depends_on:
+      - postgres
+      - redis
+      - licensing-api
+    networks:
+      - tollbit-network
+
 networks:
   tollbit-network:
     driver: bridge

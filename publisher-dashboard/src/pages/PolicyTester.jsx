@@ -13,7 +13,6 @@ export default function PolicyTester() {
   const [urls, setUrls] = useState([]);
   const [selectedUrl, setSelectedUrl] = useState('');
   const [selectedBot, setSelectedBot] = useState('GPTBot');
-  const [selectedPurpose, setSelectedPurpose] = useState('inference');
   const [testResults, setTestResults] = useState([]);
   const [testing, setTesting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -27,12 +26,6 @@ export default function PolicyTester() {
     { id: 'GoogleBot', name: 'GoogleBot', description: 'Google search crawler' },
     { id: 'BingBot', name: 'BingBot', description: 'Bing search crawler' },
     { id: 'UnknownBot', name: 'UnknownBot', description: 'Unlisted/unknown bot' }
-  ];
-
-  const purposes = [
-    { id: 'inference', name: 'Inference', description: 'Real-time AI responses' },
-    { id: 'training', name: 'Training', description: 'Model training data' },
-    { id: 'research', name: 'Research', description: 'Research purposes' }
   ];
 
   useEffect(() => {
@@ -70,8 +63,7 @@ export default function PolicyTester() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           url: selectedUrl,
-          clientId: selectedBot,
-          purpose: selectedPurpose
+          clientId: selectedBot
         })
       });
 
@@ -82,7 +74,6 @@ export default function PolicyTester() {
         timestamp: new Date().toLocaleTimeString(),
         url: selectedUrl,
         bot: selectedBot,
-        purpose: selectedPurpose,
         allowed: !data.error,
         status: response.status,
         data: data,
@@ -96,7 +87,6 @@ export default function PolicyTester() {
         timestamp: new Date().toLocaleTimeString(),
         url: selectedUrl,
         bot: selectedBot,
-        purpose: selectedPurpose,
         allowed: false,
         status: 500,
         data: null,
@@ -187,11 +177,11 @@ export default function PolicyTester() {
         </p>
       </div>
 
-      {/* Test Configuration */}
+      {/* Scraper */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Test Configuration</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Scraper</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           {/* URL Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -235,27 +225,6 @@ export default function PolicyTester() {
             </select>
             <p className="text-xs text-gray-500 mt-1">
               {commonBots.find(b => b.id === selectedBot)?.description}
-            </p>
-          </div>
-
-          {/* Purpose Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Purpose
-            </label>
-            <select
-              value={selectedPurpose}
-              onChange={(e) => setSelectedPurpose(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            >
-              {purposes.map((purpose) => (
-                <option key={purpose.id} value={purpose.id}>
-                  {purpose.name}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-gray-500 mt-1">
-              {purposes.find(p => p.id === selectedPurpose)?.description}
             </p>
           </div>
         </div>
@@ -345,8 +314,7 @@ function TestResult({ result }) {
                 </span>
               </div>
               <div className="text-sm text-gray-600 mt-1">
-                <span className="font-medium">{result.bot}</span> attempted to access for{' '}
-                <span className="font-medium">{result.purpose}</span>
+                <span className="font-medium">{result.bot}</span> attempted to access
               </div>
             </div>
           </div>
@@ -356,7 +324,71 @@ function TestResult({ result }) {
           </div>
 
           {/* Quick Info */}
-          {result.allowed && result.data?.rate && (
+          {result.allowed && result.data?.license && (
+            <div className="ml-9 mt-3 space-y-2">
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1">
+                  <span className="text-gray-600">Price:</span>
+                  <span className="font-semibold text-green-600">
+                    ${result.data.license.costPerFetch?.toFixed(4) || '0.0000'}
+                  </span>
+                  <span className="text-gray-500 text-xs">{result.data.license.currency || 'USD'}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-gray-600">Status:</span>
+                  <span className={`font-medium ${result.data.license.status === 'licensed' ? 'text-green-600' : 'text-amber-600'}`}>
+                    {result.data.license.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* License Type Info */}
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1">
+                  <ShieldCheckIcon className="w-4 h-4 text-blue-600" />
+                  <span className="text-gray-600">License Type:</span>
+                  <span className="font-medium text-blue-600">
+                    {result.data.license.licenseTypeName || 'RAGDisplayUnrestricted'}
+                  </span>
+                  <span className="text-gray-500 text-xs">({result.data.license.licenseType})</span>
+                </div>
+              </div>
+
+              {/* Conditional License Details */}
+              {(result.data.license.maxWordCount || result.data.license.attributionRequired) && (
+                <div className="flex items-center gap-4 text-sm pl-5">
+                  {result.data.license.maxWordCount && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-600">Max Words:</span>
+                      <span className="font-medium text-amber-600">
+                        {result.data.license.maxWordCount}
+                      </span>
+                    </div>
+                  )}
+                  {result.data.license.attributionRequired && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-gray-600">Attribution:</span>
+                      <span className="font-medium text-purple-600">
+                        Required
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Policy Info */}
+              <div className="text-xs text-gray-500">
+                Policy: <span className="font-medium text-gray-700">{result.data.license.policyName}</span>
+                {' • '}
+                Rule: <span className="font-medium text-gray-700">{result.data.license.rule}</span>
+                {' • '}
+                Type: <span className="font-medium text-gray-700">{result.data.license.policyType}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Legacy rate info fallback */}
+          {result.allowed && result.data?.rate && !result.data?.license && (
             <div className="ml-9 mt-3 flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1">
                 <span className="text-gray-600">Price:</span>

@@ -340,9 +340,10 @@ function PolicyEditorModal({ policy, publisherId, onClose, onSave }) {
         {
           agent: '',
           allow: true,
-          purpose: ['inference'],
-          price_per_fetch: 0.002,
-          token_ttl_seconds: 600,
+          purpose: [], // Empty array = no restriction (applies to all purposes)
+          license_type: 1, // Default: RAG Display (Unrestricted)
+          price_per_fetch: 0.001,
+          token_ttl_seconds: 86400,
           max_rps: 2
         }
       ]
@@ -377,6 +378,8 @@ function PolicyEditorModal({ policy, publisherId, onClose, onSave }) {
     setSaving(true);
 
     try {
+      // Always use the logged-in user's publisherId for policy creation
+      // Policies belong to the publisher who creates them, not to the domain in the URL
       await axios.put(`/api/policies/${publisherId}`, {
         policy: {
           default: { allow: formData.defaultAllow },
@@ -543,6 +546,57 @@ function PolicyEditorModal({ policy, publisherId, onClose, onSave }) {
 
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">
+                        License Type
+                      </label>
+                      <select
+                        value={rule.license_type || 1}
+                        onChange={(e) => handleRuleChange(index, 'license_type', parseInt(e.target.value))}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value={0}>Training + Display</option>
+                        <option value={1}>RAG Display (Unrestricted)</option>
+                        <option value={2}>RAG Display (Max Words)</option>
+                        <option value={3}>RAG Display (Attribution)</option>
+                        <option value={4}>RAG No Display</option>
+                      </select>
+                    </div>
+
+                    <div className="col-span-2">
+                      <label className="block text-xs font-medium text-gray-700 mb-2">
+                        Purpose Restrictions (optional)
+                      </label>
+                      <div className="flex flex-wrap gap-3">
+                        {[
+                          { id: 0, name: 'Training + Display' },
+                          { id: 1, name: 'RAG Display (Unrestricted)' },
+                          { id: 2, name: 'RAG Display (Max Words)' },
+                          { id: 3, name: 'RAG Display (Attribution)' },
+                          { id: 4, name: 'RAG No Display' }
+                        ].map(purpose => (
+                          <label key={purpose.id} className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              checked={(rule.purpose || []).includes(purpose.id)}
+                              onChange={(e) => {
+                                const currentPurposes = rule.purpose || [];
+                                const newPurposes = e.target.checked
+                                  ? [...currentPurposes, purpose.id]
+                                  : currentPurposes.filter(p => p !== purpose.id);
+                                handleRuleChange(index, 'purpose', newPurposes);
+                              }}
+                              className="w-3 h-3 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                            />
+                            <span className="text-xs text-gray-700">{purpose.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Leave all unchecked to apply this rule to all purposes
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
                         Price per Fetch ($)
                       </label>
                       <input
@@ -553,6 +607,34 @@ function PolicyEditorModal({ policy, publisherId, onClose, onSave }) {
                         className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
+
+                    {rule.license_type === 2 && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Max Word Count
+                        </label>
+                        <input
+                          type="number"
+                          value={rule.max_word_count || 100}
+                          onChange={(e) => handleRuleChange(index, 'max_word_count', parseInt(e.target.value))}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    )}
+
+                    {rule.license_type === 3 && (
+                      <div className="flex items-center">
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={rule.attribution_required || false}
+                            onChange={(e) => handleRuleChange(index, 'attribution_required', e.target.checked)}
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                          />
+                          <span className="text-xs text-gray-700">Attribution Required</span>
+                        </label>
+                      </div>
+                    )}
 
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">

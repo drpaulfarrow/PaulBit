@@ -88,6 +88,32 @@ router.put('/:publisherId', async (req, res) => {
       return res.status(400).json({ error: 'Missing policy data' });
     }
 
+    // Determine if publisherId is numeric (ID) or string (hostname)
+    const isNumeric = !isNaN(publisherId);
+    let actualPublisherId;
+
+    if (isNumeric) {
+      actualPublisherId = publisherId;
+    } else {
+      // It's a hostname - find or create the publisher
+      const publisherQuery = await db.query(
+        'SELECT id FROM publishers WHERE hostname = $1',
+        [publisherId]
+      );
+
+      if (publisherQuery.rows.length > 0) {
+        actualPublisherId = publisherQuery.rows[0].id;
+      } else {
+        // Auto-create publisher for this hostname
+        const insertResult = await db.query(
+          'INSERT INTO publishers (name, hostname) VALUES ($1, $2) RETURNING id',
+          [publisherId, publisherId]
+        );
+        actualPublisherId = insertResult.rows[0].id;
+        console.log(`Auto-created publisher: id=${actualPublisherId}, hostname=${publisherId}`);
+      }
+    }
+
     // Determine if this is a page-specific or default policy
     const isPageSpecific = urlPattern && urlPattern !== 'null' && urlPattern !== '';
     const policyUrlPattern = isPageSpecific ? urlPattern : null;
@@ -96,36 +122,43 @@ router.put('/:publisherId', async (req, res) => {
       ? `Page-specific policy for ${urlPattern}` 
       : 'Publisher-wide default licensing policy');
 
-    // Get current version for this policy type (page-specific or default)
-    let versionQuery = 'SELECT version FROM policies WHERE publisher_id = $1';
-    const versionParams = [publisherId];
+    // Use UPSERT: Insert or update existing policy (no versioning)
+    // For page-specific policies: unique on (publisher_id, url_pattern)
+    // For default policies: unique on (publisher_id) where url_pattern IS NULL
+    let result;
     
     if (isPageSpecific) {
-      versionQuery += ' AND url_pattern = $2';
-      versionParams.push(policyUrlPattern);
+      result = await db.query(
+        `INSERT INTO policies (publisher_id, policy_json, version, url_pattern, name, description, created_at)
+         VALUES ($1, $2, '1.0', $3, $4, $5, NOW())
+         ON CONFLICT (publisher_id, url_pattern) WHERE url_pattern IS NOT NULL
+         DO UPDATE SET
+           policy_json = EXCLUDED.policy_json,
+           name = EXCLUDED.name,
+           description = EXCLUDED.description,
+           created_at = NOW()
+         RETURNING id, version, url_pattern, name, description, created_at`,
+        [actualPublisherId, JSON.stringify(policy), policyUrlPattern, policyName, policyDescription]
+      );
     } else {
-      versionQuery += ' AND url_pattern IS NULL';
+      result = await db.query(
+        `INSERT INTO policies (publisher_id, policy_json, version, url_pattern, name, description, created_at)
+         VALUES ($1, $2, '1.0', NULL, $3, $4, NOW())
+         ON CONFLICT (publisher_id) WHERE url_pattern IS NULL
+         DO UPDATE SET
+           policy_json = EXCLUDED.policy_json,
+           name = EXCLUDED.name,
+           description = EXCLUDED.description,
+           created_at = NOW()
+         RETURNING id, version, url_pattern, name, description, created_at`,
+        [actualPublisherId, JSON.stringify(policy), policyName, policyDescription]
+      );
     }
-    
-    versionQuery += ' ORDER BY created_at DESC LIMIT 1';
-    
-    const currentResult = await db.query(versionQuery, versionParams);
-
-    const newVersion = currentResult.rows.length > 0 
-      ? (parseFloat(currentResult.rows[0].version) + 0.1).toFixed(1)
-      : '1.0';
-
-    // Insert new policy version
-    const result = await db.query(
-      `INSERT INTO policies (publisher_id, policy_json, version, url_pattern, name, description, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())
-       RETURNING id, version, url_pattern, name, description, created_at`,
-      [publisherId, JSON.stringify(policy), newVersion, policyUrlPattern, policyName, policyDescription]
-    );
 
     res.json({
       success: true,
       policy_id: result.rows[0].id,
+      publisher_id: actualPublisherId,
       version: result.rows[0].version,
       url_pattern: result.rows[0].url_pattern,
       name: result.rows[0].name,

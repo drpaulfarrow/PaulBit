@@ -1,0 +1,7 @@
+{
+  "url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+  "clientId": "ClaudeBot",
+  "userAgent": "ClaudeBot/1.0",
+  "purpose": 1,
+  "extractMainContent": true
+}

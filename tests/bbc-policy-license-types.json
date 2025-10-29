@@ -1,0 +1,30 @@
+{
+  "policy": {
+    "default": {
+      "allow": true,
+      "price_per_fetch": 0.001,
+      "license_type": 1
+    },
+    "rules": [
+      {
+        "agent": "gptbot",
+        "allow": true,
+        "price_per_fetch": 0.005,
+        "license_type": 2,
+        "max_word_count": 150,
+        "purpose": []
+      },
+      {
+        "agent": "claudebot",
+        "allow": true,
+        "price_per_fetch": 0.003,
+        "license_type": 3,
+        "attribution_required": true,
+        "purpose": []
+      }
+    ]
+  },
+  "urlPattern": "https://www.bbc.co.uk/news/articles/cq503p7yjypo",
+  "name": "License Types Test",
+  "description": "GPTBot: RAG Max Words (150), ClaudeBot: RAG Attribution, Others: RAG Unrestricted"
+}

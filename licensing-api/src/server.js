@@ -8,6 +8,15 @@ const usageRoutes = require('./routes/usage');
 const adminRoutes = require('./routes/admin');
 const groundingRoutes = require('./routes/grounding');
 const parsedUrlsRoutes = require('./routes/parsed-urls');
+const domainCrawlerRoutes = require('./routes/domain-crawler');
+const notificationsRoutes = require('./routes/notifications');
+
+// cm_rtbspec v0.1 routes
+const contentRoutes = require('./routes/content');
+const licensesRoutes = require('./routes/licenses');
+const accessRoutes = require('./routes/access');
+const auditRoutes = require('./routes/audit');
+const wellKnownRoutes = require('./routes/well-known');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +39,15 @@ app.use('/usage', usageRoutes);
 app.use('/admin', adminRoutes);
 app.use('/', groundingRoutes);
 app.use('/', parsedUrlsRoutes);
+app.use('/domain-crawler', domainCrawlerRoutes);
+
+// cm_rtbspec v0.1 routes
+app.use('/api/content', contentRoutes);
+app.use('/api/licenses', licensesRoutes);
+app.use('/api/access', accessRoutes);
+app.use('/api/audit', auditRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/.well-known', wellKnownRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

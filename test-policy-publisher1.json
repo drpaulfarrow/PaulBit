@@ -1,0 +1,28 @@
+{
+  "urlPattern": "https://en.wikipedia.org/wiki/Machine_learning",
+  "name": "Wikipedia ML Article Policy",
+  "description": "Page-specific policy for Wikipedia Machine Learning article - Publisher A",
+  "policy": {
+    "default": {
+      "allow": false
+    },
+    "rules": [
+      {
+        "agent": "gptbot",
+        "allow": true,
+        "purpose": [1],
+        "license_type": 1,
+        "price_per_fetch": 0.001,
+        "token_ttl_seconds": 86400,
+        "max_rps": 2
+      },
+      {
+        "agent": "claudebot",
+        "allow": false,
+        "purpose": [],
+        "license_type": 0,
+        "price_per_fetch": 0
+      }
+    ]
+  }
+}

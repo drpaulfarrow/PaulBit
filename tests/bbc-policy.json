@@ -1,0 +1,17 @@
+{
+  "policy": {
+    "default": {
+      "allow": false
+    },
+    "rules": [
+      {
+        "agent": "gptbot",
+        "allow": false,
+        "purpose": []
+      }
+    ]
+  },
+  "urlPattern": "https://www.bbc.co.uk/news/articles/cq503p7yjypo",
+  "name": "Block GPTBot",
+  "description": "Test policy to block GPTBot"
+}
