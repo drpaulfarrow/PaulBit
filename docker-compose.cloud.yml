@@ -1,15 +1,29 @@
 version: '3.8'
 
 services:
+  # Public entrypoint (frontend / grounding API)
+  url-parser:
+    image: paulandrewfarrow/tollbit-url-parser:latest
+    ports:
+      - "80:5173"                       # Azure external port 80 → internal 5173
+    environment:
+      - NODE_ENV=production
+      - PORT=5173
+      - CORS_ORIGINS=https://monetizeplusappcompose.azurewebsites.net
+    depends_on:
+      - licensing-api
+    networks:
+      - tollbit-network
+
+  # Optional Nginx edge gateway (kept internal for now)
   edge:
     image: nginx:alpine
-    ports:
-      - "80:8080"  # Azure entrypoint
     depends_on:
       - edge-worker
     networks:
       - tollbit-network
 
+  # Edge worker – bot detection / routing
   edge-worker:
     image: paulandrewfarrow/tollbit-edge-worker:latest
     environment:
@@ -24,6 +38,7 @@ services:
     networks:
       - tollbit-network
 
+  # Licensing API – authentication, tokens, metering
   licensing-api:
     image: paulandrewfarrow/tollbit-licensing-api:latest
     environment:
@@ -40,6 +55,7 @@ services:
     networks:
       - tollbit-network
 
+  # Publisher mocks
   publisher-a:
     image: paulandrewfarrow/tollbit-publisher-a:latest
     networks:
@@ -50,22 +66,7 @@ services:
     networks:
       - tollbit-network
 
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=tollbit
-      - POSTGRES_USER=tollbit
-      - POSTGRES_PASSWORD=tollbit123
-    networks:
-      - tollbit-network
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7-alpine
-    networks:
-      - tollbit-network
-
+  # Publisher dashboard (internal UI)
   publisher-dashboard:
     image: paulandrewfarrow/tollbit-publisher-dashboard:latest
     depends_on:
@@ -73,15 +74,7 @@ services:
     networks:
       - tollbit-network
 
-  url-parser:
-    image: paulandrewfarrow/tollbit-url-parser:latest
-    environment:
-      - NODE_ENV=production
-      - PORT=4000
-      - CORS_ORIGINS=http://localhost:5173
-    networks:
-      - tollbit-network
-
+  # Negotiation Agent – AI-to-AI license negotiation
   negotiation-agent:
     image: paulandrewfarrow/paulbit:latest
     environment:
@@ -100,6 +93,23 @@ services:
       - postgres
       - redis
       - licensing-api
+    networks:
+      - tollbit-network
+
+  # Databases / cache
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=tollbit
+      - POSTGRES_USER=tollbit
+      - POSTGRES_PASSWORD=tollbit123
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - tollbit-network
+
+  redis:
+    image: redis:7-alpine
     networks:
       - tollbit-network
 
