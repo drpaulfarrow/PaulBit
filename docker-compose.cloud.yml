@@ -1,11 +1,10 @@
 version: '3'
-
 services:
+  licensing-api:
+    image: paulandrewfarrow/tollbit-licensing-api:latest
+    ports:
+      - "3000:3000"
   urlparser:
     image: paulandrewfarrow/tollbit-url-parser:latest
     ports:
-      - "80:5173"
-    environment:
-      NODE_ENV: production
-      PORT: 5173
-      CORS_ORIGINS: https://monetizeplusapp.azurewebsites.net
+      - "80:80"
