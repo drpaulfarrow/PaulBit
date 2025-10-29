@@ -214,16 +214,18 @@ class Content {
       [id, 'active']
     );
     
-    // Get access endpoints for each license
-    const licenseOptionsWithAccess = await Promise.all(
-      licenses.rows.map(async (license) => {
-        const accessEndpoints = await db.query(
-          'SELECT * FROM access_endpoints WHERE license_id = $1 ORDER BY id',
-          [license.id]
-        );
-        
+    // Get access endpoints (publisher-level, not license-specific)
+    const publisherId = content.publisher_id || 1;
+    const accessEndpoints = await db.query(
+      'SELECT * FROM access_endpoints WHERE publisher_id = $1 ORDER BY id',
+      [publisherId]
+    );
+    
+    // Build license options with shared access endpoints
+    const licenseOptionsWithAccess = licenses.rows.map(license => {
         const licenseData = {
           license_id: license.license_id,
+          license_name: license.name || `license_${license.id}`,
           license_type: license.license_type,
           price: parseFloat(license.price),
           currency: license.currency
@@ -261,8 +263,7 @@ class Content {
         }
         
         return licenseData;
-      })
-    );
+      });
     
     // Build content object
     const contentData = {

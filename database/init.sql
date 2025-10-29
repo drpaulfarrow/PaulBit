@@ -1,4 +1,4 @@
--- Tollbit-inspired Content Licensing Gateway Database Schema
+-- MonetizePlus Content Licensing Gateway Database Schema
 
 -- Publishers table
 CREATE TABLE IF NOT EXISTS publishers (
@@ -228,5 +228,5 @@ INSERT INTO policies (publisher_id, policy_json, version, url_pattern, name, des
 ON CONFLICT DO NOTHING;
 
 -- Grant permissions (if needed for specific user)
--- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO tollbit;
--- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO tollbit;
+-- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO monetizeplus;
+-- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO monetizeplus;

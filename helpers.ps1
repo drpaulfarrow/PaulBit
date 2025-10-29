@@ -106,12 +106,12 @@ function Rebuild-Services {
 
 function Connect-Database {
     Write-Host "Connecting to PostgreSQL..." -ForegroundColor Green
-    docker exec -it tollbit-postgres psql -U tollbit -d tollbit
+    docker exec -it monetizeplus-postgres psql -U monetizeplus -d monetizeplus
 }
 
 function Connect-Redis {
     Write-Host "Connecting to Redis..." -ForegroundColor Green
-    docker exec -it tollbit-redis redis-cli
+    docker exec -it monetizeplus-redis redis-cli
 }
 
 function Show-Usage {

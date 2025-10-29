@@ -11,7 +11,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Check if postgres container is running
-$postgresRunning = docker ps --filter "name=tollbit-postgres" --format "{{.Names}}"
+$postgresRunning = docker ps --filter "name=monetizeplus-postgres" --format "{{.Names}}"
 if (-not $postgresRunning) {
     Write-Host "ERROR: PostgreSQL container is not running. Run 'docker-compose up -d' first." -ForegroundColor Red
     exit 1
@@ -21,18 +21,18 @@ Write-Host "Found PostgreSQL container: $postgresRunning" -ForegroundColor Green
 
 # Run the migration
 Write-Host "`nExecuting migration SQL..." -ForegroundColor Yellow
-docker exec tollbit-postgres psql -U tollbit -d tollbit -f /docker-entrypoint-initdb.d/migrations/006_cm_rtbspec_schema.sql
+docker exec monetizeplus-postgres psql -U monetizeplus -d monetizeplus -f /docker-entrypoint-initdb.d/migrations/006_cm_rtbspec_schema.sql
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`n✅ Migration completed successfully!" -ForegroundColor Green
     
     # Verify new tables exist
     Write-Host "`nVerifying new tables..." -ForegroundColor Yellow
-    docker exec tollbit-postgres psql -U tollbit -d tollbit -c "\dt content license_options access_endpoints audit_trail"
+    docker exec monetizeplus-postgres psql -U monetizeplus -d monetizeplus -c "\dt content license_options access_endpoints audit_trail"
     
     # Check row counts
     Write-Host "`nChecking data migration..." -ForegroundColor Yellow
-    docker exec tollbit-postgres psql -U tollbit -d tollbit -c "SELECT 'content' as table_name, COUNT(*) FROM content UNION ALL SELECT 'license_options', COUNT(*) FROM license_options UNION ALL SELECT 'access_endpoints', COUNT(*) FROM access_endpoints;"
+    docker exec monetizeplus-postgres psql -U monetizeplus -d monetizeplus -c "SELECT 'content' as table_name, COUNT(*) FROM content UNION ALL SELECT 'license_options', COUNT(*) FROM license_options UNION ALL SELECT 'access_endpoints', COUNT(*) FROM access_endpoints;"
     
 } else {
     Write-Host "`n❌ Migration failed!" -ForegroundColor Red

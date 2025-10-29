@@ -1,5 +1,5 @@
 # ==============================================
-# Tollbit Educational - Safe Docker Hub Auto Push (Plain)
+# MonetizePlus Educational - Safe Docker Hub Auto Push (Plain)
 # Author: Paul Farrow
 # ==============================================
 
@@ -19,7 +19,7 @@ try {
     exit 1
 }
 
-Write-Host "`nBuilding all Tollbit images..."
+Write-Host "`nBuilding all MonetizePlus images..."
 try {
     docker-compose build | Out-Host
 } catch {
@@ -27,19 +27,19 @@ try {
     exit 1
 }
 
-Write-Host "`nScanning for local Tollbit images..."
+Write-Host "`nScanning for local MonetizePlus images..."
 try {
     # Clean output of carriage returns and whitespace
     $images = docker images --format "{{.Repository}}" |
         ForEach-Object { ($_ -replace "`r","").Trim() } |
-        Where-Object { $_ -ne "" -and $_ -like "tollbit-*" }
+        Where-Object { $_ -ne "" -and $_ -like "monetizeplus-*" }
 } catch {
     Write-Host "Failed to list Docker images."
     exit 1
 }
 
 if (-not $images -or $images.Count -eq 0) {
-    Write-Host "No local Tollbit images found."
+    Write-Host "No local MonetizePlus images found."
     exit 1
 }
 
@@ -72,5 +72,5 @@ foreach ($img in $images) {
     }
 }
 
-Write-Host "`nAll Tollbit images processed!"
+Write-Host "`nAll MonetizePlus images processed!"
 Write-Host "Check them on Docker Hub: https://hub.docker.com/repositories/$dockerUser"

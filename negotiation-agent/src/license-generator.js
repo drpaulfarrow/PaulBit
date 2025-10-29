@@ -45,7 +45,7 @@ export class LicenseGenerator {
     const context = negotiation.context || {};
     const urlPatterns = context.url_patterns || null;
 
-    // Build policy JSON in Tollbit format
+    // Build policy JSON in MonetizePlus format
     const policyJson = this.buildPolicyJson(
       negotiation.publisher_hostname,
       negotiation.client_name,

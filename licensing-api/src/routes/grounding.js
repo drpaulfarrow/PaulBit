@@ -96,7 +96,7 @@ router.post('/grounding/test', async (req, res) => {
       timeout: 20000,
       headers: {
         ...requestHeaders,
-        'User-Agent': 'Tollbit-Scraper/1.0',
+        'User-Agent': 'MonetizePlus-Scraper/1.0',
         'X-License-Id': licenseId.toString(),
         'X-Publisher-Id': publisherId.toString()
       }
@@ -189,7 +189,7 @@ router.post('/grounding/test', async (req, res) => {
 
     const licenseInfo = {
       licenseId: license.id,
-      licenseName: `license_${license.id}`,
+      licenseName: license.name || `license_${license.id}`,
       licenseType: license.license_type,
       licenseTypeName: licenseTypeNames[license.license_type] || 'Unknown',
       price: parseFloat(license.price),
@@ -247,7 +247,7 @@ router.post('/grounding/test', async (req, res) => {
             publisherId,
             4, // Test client
             url,
-            'Tollbit-Test-Scraper/1.0',
+            'MonetizePlus-Test-Scraper/1.0',
             Math.round(parseFloat(license.price) * 1000000),
             'test',
             licenseId
@@ -279,7 +279,6 @@ router.post('/grounding/test', async (req, res) => {
  * {
  *   "url": "https://site-a.local/news/foo.html",
  *   "userAgent": "GPTBot/1.0",
- *   "purpose": "inference",
  *   "clientId": "openai-client-123",
  *   "extractMainContent": true,
  *   "includeMetadata": true
@@ -309,7 +308,6 @@ router.post('/grounding', async (req, res) => {
     const {
       url,
       userAgent = 'Unknown',
-      purpose = 'inference',
       clientId = 'anonymous',
       extractMainContent = true,
       includeMetadata = true
@@ -447,7 +445,7 @@ router.post('/grounding', async (req, res) => {
         let costPerFetch = policyDoc.default?.price_per_fetch || 0;
         let matchedRule = null;
 
-        console.log(`Policy evaluation for: ${agentName} accessing ${url} for ${purpose}`);
+        console.log(`Policy evaluation for: ${agentName} accessing ${url}`);
         console.log(`Default policy: allow=${allowed}`);
 
         // Check for specific agent rules
@@ -457,7 +455,7 @@ router.post('/grounding', async (req, res) => {
           // Skip empty rules
           if (!ruleAgent) continue;
           
-          console.log(`Checking rule: agent=${ruleAgent}, allow=${rule.allow}, purposes=${JSON.stringify(rule.purpose)}`);
+          console.log(`Checking rule: agent=${ruleAgent}, allow=${rule.allow}, license_type=${rule.license_type}`);
           
           // Match: exact match or wildcard (*)
           const isMatch = ruleAgent === '*' || 
@@ -466,26 +464,11 @@ router.post('/grounding', async (req, res) => {
           
           if (isMatch) {
             console.log(`  → Agent matched: ${ruleAgent} === ${agentName}`);
-            // Check if rule has purpose restrictions
-            if (rule.purpose && Array.isArray(rule.purpose) && rule.purpose.length > 0) {
-              // Purpose-specific rule: only match if purpose matches
-              if (rule.purpose.includes(purpose)) {
-                console.log(`  → Purpose matched: ${purpose} in ${JSON.stringify(rule.purpose)}`);
-                allowed = rule.allow;
-                costPerFetch = rule.price_per_fetch || costPerFetch;
-                matchedRule = rule;
-                break;
-              } else {
-                console.log(`  → Purpose NOT matched: ${purpose} not in ${JSON.stringify(rule.purpose)}`);
-              }
-            } else {
-              // No purpose restriction: always match
-              console.log(`  → No purpose restriction, applying rule`);
-              allowed = rule.allow;
-              costPerFetch = rule.price_per_fetch || costPerFetch;
-              matchedRule = rule;
-              break;
-            }
+            // Agent matches - apply this rule
+            allowed = rule.allow;
+            costPerFetch = rule.price_per_fetch || costPerFetch;
+            matchedRule = rule;
+            break;
           }
         }
 
@@ -544,7 +527,7 @@ router.post('/grounding', async (req, res) => {
             
             await db.query(
               `INSERT INTO usage_events 
-               (id, ts, publisher_id, client_id, url, agent_ua, cost_micro, purpose) 
+               (id, ts, publisher_id, client_id, url, agent_ua, cost_micro, license_type) 
                VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7)`,
               [
                 uuidv4(),
@@ -553,7 +536,7 @@ router.post('/grounding', async (req, res) => {
                 url,
                 userAgent,
                 Math.round(costPerFetch * 1000000), // Convert to micro-dollars
-                purpose
+                licenseType
               ]
             );
           } catch (err) {

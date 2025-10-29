@@ -1,6 +1,6 @@
 const { Pool } = require('pg');
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://tollbit:tollbit123@postgres:5432/tollbit';
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus';
 
 let pool = null;
 

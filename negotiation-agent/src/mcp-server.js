@@ -13,7 +13,7 @@ export class NegotiationMCPServer {
   constructor() {
     this.server = new Server(
       {
-        name: 'tollbit-negotiation-agent',
+        name: 'monetizeplus-negotiation-agent',
         version: '1.0.0',
       },
       {

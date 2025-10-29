@@ -463,7 +463,7 @@ Dependencies:
 ┌──────────────────────────────────────────────────────────────┐
 │                     Host Machine                             │
 │  ┌────────────────────────────────────────────────────────┐  │
-│  │            Docker Network: tollbit-network             │  │
+│  │            Docker Network: monetizeplus-network             │  │
 │  │                                                        │  │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌────────────┐  │  │
 │  │  │ edge         │  │ edge-worker  │  │ licensing  │  │  │

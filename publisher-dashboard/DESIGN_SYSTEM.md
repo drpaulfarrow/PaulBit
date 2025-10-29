@@ -1,6 +1,6 @@
-# Tollbit Design System
+# MonetizePlus Design System
 
-Inspired by modern enterprise UI patterns, this design system provides consistent, accessible, and professional styling for the Tollbit dashboard.
+Inspired by modern enterprise UI patterns, this design system provides consistent, accessible, and professional styling for the MonetizePlus dashboard.
 
 ## 🎨 Color Palette
 

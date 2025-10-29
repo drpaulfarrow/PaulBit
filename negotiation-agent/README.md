@@ -1,6 +1,6 @@
-# Tollbit Negotiation Agent
+# MonetizePlus Negotiation Agent
 
-AI-to-AI autonomous license negotiation system for Tollbit.
+AI-to-AI autonomous license negotiation system for MonetizePlus.
 
 ## Overview
 
@@ -142,9 +142,9 @@ Get general information about a publisher's negotiation approach.
 # Database
 POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
-POSTGRES_DB=tollbit
-POSTGRES_USER=tollbit
-POSTGRES_PASSWORD=tollbit123
+POSTGRES_DB=monetizeplus
+POSTGRES_USER=monetizeplus
+POSTGRES_PASSWORD=monetizeplus123
 
 # Redis
 REDIS_HOST=redis
@@ -268,7 +268,7 @@ export OPENAI_API_KEY=sk-...
 export ANTHROPIC_API_KEY=sk-ant-...
 
 # Run migration
-docker-compose exec postgres psql -U tollbit -d tollbit -f /docker-entrypoint-initdb.d/migrations/009_negotiation_system.sql
+docker-compose exec postgres psql -U monetizeplus -d monetizeplus -f /docker-entrypoint-initdb.d/migrations/009_negotiation_system.sql
 
 # Start service
 docker-compose up -d negotiation-agent

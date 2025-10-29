@@ -1,5 +1,5 @@
 {
-  "name": "tollbit-licensing-api",
+  "name": "monetizeplus-licensing-api",
   "version": "1.0.0",
   "description": "Licensing gateway API for token issuance and policy management",
   "main": "src/server.js",

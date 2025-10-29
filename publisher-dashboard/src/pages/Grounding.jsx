@@ -54,11 +54,10 @@ export default function Grounding() {
     const startTime = Date.now();
 
     try {
-      const response = await axios.post('/api/grounding/test', {
+      const response = await axios.post('/api/grounding', {
         url,
-        botName,
-        licenseType: selectedPurpose,
-        publisherId: 1,
+        userAgent: `${botName}/1.0`,
+        clientId: botName.toLowerCase(),
         extractMainContent: true,
         includeMetadata: true
       });

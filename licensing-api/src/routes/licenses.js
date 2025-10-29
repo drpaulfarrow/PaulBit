@@ -113,14 +113,39 @@ router.get('/content/:contentId', async (req, res) => {
 
 /**
  * POST /api/licenses
- * Create new license
+ * Create new license (supports multiple types via license_types array)
  */
 router.post('/', async (req, res) => {
   try {
     const userId = req.body.userId || req.headers['x-user-id'];
-    const license = await LicenseOption.create(req.body, userId);
+    const { license_types, ...licenseData } = req.body;
     
-    res.status(201).json({ success: true, license });
+    // If license_types array is provided, create one license per type
+    if (license_types && Array.isArray(license_types) && license_types.length > 0) {
+      const createdLicenses = [];
+      
+      for (const licenseType of license_types) {
+        const licenseWithType = {
+          ...licenseData,
+          license_type: licenseType
+        };
+        const license = await LicenseOption.create(licenseWithType, userId);
+        createdLicenses.push(license);
+      }
+      
+      // Return all created licenses
+      res.status(201).json({ 
+        success: true, 
+        licenses: createdLicenses,
+        license: createdLicenses[0] // For backward compatibility
+      });
+    } else if (req.body.license_type !== undefined) {
+      // Legacy single license creation
+      const license = await LicenseOption.create(req.body, userId);
+      res.status(201).json({ success: true, license });
+    } else {
+      throw new Error('Either license_type or license_types array is required');
+    }
   } catch (error) {
     console.error('Error creating license:', error);
     res.status(400).json({ success: false, error: error.message });

@@ -1,4 +1,4 @@
-# Tollbit Design System - Quick Reference
+# MonetizePlus Design System - Quick Reference
 
 ## 🎨 Color Swatches
 

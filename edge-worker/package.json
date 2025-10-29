@@ -1,5 +1,5 @@
 {
-  "name": "tollbit-edge-worker",
+  "name": "monetizeplus-edge-worker",
   "version": "1.0.0",
   "description": "Edge worker for bot detection and routing",
   "main": "src/app.js",

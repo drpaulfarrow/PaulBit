@@ -47,7 +47,7 @@ async function getSitemapUrls(sitemapUrl, limit = 5) {
     const response = await axios.get(sitemapUrl, { 
       timeout: 15000,
       headers: {
-        'User-Agent': 'TollbitCrawler/1.0'
+        'User-Agent': 'MonetizePlusCrawler/1.0'
       }
     });
     const xml = response.data;

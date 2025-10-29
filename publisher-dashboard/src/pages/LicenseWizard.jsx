@@ -163,7 +163,7 @@ export default function LicenseManager({ publisherId }) {
     setEditingLicense(license);
     setFormData({
       name: license.name || '',
-      license_type: license.license_type,
+      license_types: license.license_type !== undefined ? [license.license_type] : [], // Convert single type to array
       price: license.price.toString(),
       currency: license.currency,
       term_months: license.term_months ? license.term_months.toString() : '',
@@ -365,21 +365,34 @@ export default function LicenseManager({ publisherId }) {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      License Type <span className="text-red-500">*</span>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      License Types <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      value={formData.license_type}
-                      onChange={(e) => setFormData({ ...formData, license_type: parseInt(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    >
+                    <div className="space-y-2 border border-gray-300 rounded-lg p-3">
                       {licenseTypes.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.name} - {type.description}
-                        </option>
+                        <label key={type.value} className="flex items-start">
+                          <input
+                            type="checkbox"
+                            checked={formData.license_types.includes(type.value)}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setFormData(prev => ({
+                                ...prev,
+                                license_types: checked
+                                  ? [...prev.license_types, type.value]
+                                  : prev.license_types.filter(t => t !== type.value)
+                              }));
+                            }}
+                            className="mt-1 mr-3"
+                          />
+                          <div>
+                            <div className="font-medium text-gray-900">{type.name}</div>
+                            <div className="text-xs text-gray-500">{type.description}</div>
+                          </div>
+                        </label>
                       ))}
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">Create a license template that can be assigned to URLs later</p>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Select one or more license types. All selected types will share the same price and terms.</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -447,7 +460,7 @@ export default function LicenseManager({ publisherId }) {
                   </div>
 
                   {/* Conditional Fields */}
-                  {formData.license_type === 2 && (
+                  {formData.license_types.includes(2) && (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <label className="block text-sm font-medium text-blue-900 mb-1">
                         Maximum Word Count <span className="text-red-500">*</span>
@@ -466,7 +479,7 @@ export default function LicenseManager({ publisherId }) {
                     </div>
                   )}
 
-                  {formData.license_type === 3 && (
+                  {formData.license_types.includes(3) && (
                     <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                       <label className="flex items-center space-x-2">
                         <input

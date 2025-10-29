@@ -29,7 +29,7 @@ try {
     
     # Check the database
     Write-Host "`nChecking database..." -ForegroundColor Yellow
-    docker exec tollbit-postgres psql -U tollbit -d tollbit -c "SELECT id, status, license_id, completed_at FROM negotiations WHERE id = '$negotiationId';"
+    docker exec monetizeplus-postgres psql -U monetizeplus -d monetizeplus -c "SELECT id, status, license_id, completed_at FROM negotiations WHERE id = '$negotiationId';"
     
     Write-Host "`nCreated license:" -ForegroundColor Yellow
     docker exec tollbit-postgres psql -U tollbit -d tollbit -c "SELECT id, license_type, price, currency, status FROM license_options ORDER BY created_at DESC LIMIT 1;"

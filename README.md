@@ -1,6 +1,6 @@
-# Content Licensing Gateway (TollBit-Inspired MVP)
+# Content Licensing Gateway (MonetizePlus MVP)
 
-An educational MVP demonstrating content licensing and access control for AI bots, inspired by TollBit's approach to publisher-AI relationships.
+An educational MVP demonstrating content licensing and access control for AI bots, focused on publisher-AI relationships.
 
 ## 🎯 Overview
 
@@ -71,7 +71,7 @@ Request -->│  • Bot detect (UA/IP/Rate) │──┐
 
 ```bash
 # Clone repository
-cd Tollbit
+cd MonetizePlus
 
 # Start all services
 docker-compose up -d
@@ -91,7 +91,7 @@ All services should show as "Up" and healthy.
 - **Negotiation Agent**: http://localhost:3003
 - **Publisher A**: http://localhost:8080 (Host: site-a.local)
 - **Publisher B**: http://localhost:8080 (Host: site-b.local)
-- **PostgreSQL**: localhost:5432 (user: tollbit, db: tollbit)
+- **PostgreSQL**: localhost:5432 (user: monetizeplus, db: monetizeplus)
 - **Redis**: localhost:6379
 
 ## 📋 Running Tests
@@ -599,7 +599,7 @@ REDIS_URL=redis://redis:6379
 ```env
 NODE_ENV=development
 PORT=3000
-DATABASE_URL=postgresql://tollbit:tollbit123@postgres:5432/tollbit
+DATABASE_URL=postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
 REDIS_URL=redis://redis:6379
 JWT_SECRET=your-secret-key-change-in-production
 JWT_ISSUER=gatehouse-licensing
@@ -786,9 +786,9 @@ KEYS token:*
 # docker-compose.yml
 publisher-c:
   build: ./publisher-c
-  container_name: tollbit-publisher-c
+  container_name: monetizeplus-publisher-c
   networks:
-    - tollbit-network
+    - monetizeplus-network
 ```
 
 2. **Add to database**:
@@ -862,7 +862,7 @@ docker-compose config | grep JWT_SECRET
 ### Rate limiting not working
 ```bash
 # Check Redis connection
-docker exec -it tollbit-redis redis-cli
+docker exec -it monetizeplus-redis redis-cli
 > KEYS ratelimit:*
 ```
 
@@ -952,7 +952,7 @@ MIT License - This is educational software for learning purposes.
 
 ## 🙏 Acknowledgments
 
-Inspired by TollBit's approach to publisher-AI relationships and content licensing.
+Created to demonstrate publisher-AI relationships and content licensing concepts.
 
 ## 📞 Support
 

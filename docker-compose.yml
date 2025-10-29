@@ -4,7 +4,7 @@ services:
   # Nginx edge gateway - entry point for all traffic
   edge:
     image: nginx:alpine
-    container_name: tollbit-edge
+    container_name: monetizeplus-edge
     ports:
       - "8080:8080"
     volumes:
@@ -12,12 +12,12 @@ services:
     depends_on:
       - edge-worker
     networks:
-      - tollbit-network
+      - monetizeplus-network
 
   # Edge worker - bot detection and routing logic
   edge-worker:
     build: ./edge-worker
-    container_name: tollbit-edge-worker
+    container_name: monetizeplus-edge-worker
     environment:
       - NODE_ENV=development
       - LICENSING_API_URL=http://licensing-api:3000
@@ -28,18 +28,18 @@ services:
       - licensing-api
       - redis
     networks:
-      - tollbit-network
+      - monetizeplus-network
 
   # Licensing API - authentication, tokens, metering, policies
   licensing-api:
     build: ./licensing-api
-    container_name: tollbit-licensing-api
+    container_name: monetizeplus-licensing-api
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - DATABASE_URL=postgresql://tollbit:tollbit123@postgres:5432/tollbit
+      - DATABASE_URL=postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=your-secret-key-change-in-production
       - JWT_ISSUER=gatehouse-licensing
@@ -48,62 +48,62 @@ services:
       - postgres
       - redis
     networks:
-      - tollbit-network
+      - monetizeplus-network
 
   # Publisher A - mock content site
   publisher-a:
     build: ./publisher-a
-    container_name: tollbit-publisher-a
+    container_name: monetizeplus-publisher-a
     networks:
-      - tollbit-network
+      - monetizeplus-network
 
   # Publisher B - mock content site
   publisher-b:
     build: ./publisher-b
-    container_name: tollbit-publisher-b
+    container_name: monetizeplus-publisher-b
     networks:
-      - tollbit-network
+      - monetizeplus-network
 
   # PostgreSQL database
   postgres:
     image: postgres:15-alpine
-    container_name: tollbit-postgres
+    container_name: monetizeplus-postgres
     environment:
-      - POSTGRES_DB=tollbit
-      - POSTGRES_USER=tollbit
-      - POSTGRES_PASSWORD=tollbit123
+      - POSTGRES_DB=monetizeplus
+      - POSTGRES_USER=monetizeplus
+      - POSTGRES_PASSWORD=monetizeplus123
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     networks:
-      - tollbit-network
+      - monetizeplus-network
 
   # Redis for rate limiting and token cache
   redis:
     image: redis:7-alpine
-    container_name: tollbit-redis
+    container_name: monetizeplus-redis
     ports:
       - "6379:6379"
     networks:
-      - tollbit-network
+      - monetizeplus-network
 
   # Publisher Dashboard - UI for managing policies and viewing analytics
   publisher-dashboard:
     build: ./publisher-dashboard
-    container_name: tollbit-publisher-dashboard
+    container_name: monetizeplus-publisher-dashboard
     ports:
       - "5173:5173"
     depends_on:
       - licensing-api
     networks:
-      - tollbit-network
+      - monetizeplus-network
 
   # URL-to-Markdown Parser - grounding API for search/copilot systems
   url-parser:
     build: ./Simple Parser/url-to-markdown
-    container_name: tollbit-url-parser
+    container_name: monetizeplus-url-parser
     ports:
       - "4000:4000"
     environment:
@@ -111,12 +111,12 @@ services:
       - PORT=4000
       - CORS_ORIGINS=http://localhost:5173
     networks:
-      - tollbit-network
+      - monetizeplus-network
 
   # Negotiation Agent - AI-to-AI autonomous license negotiation
   negotiation-agent:
     build: ./negotiation-agent
-    container_name: tollbit-negotiation-agent
+    container_name: monetizeplus-negotiation-agent
     ports:
       - "3003:3003"
     environment:
@@ -124,9 +124,9 @@ services:
       - PORT=3003
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
-      - POSTGRES_DB=tollbit
-      - POSTGRES_USER=tollbit
-      - POSTGRES_PASSWORD=tollbit123
+      - POSTGRES_DB=monetizeplus
+      - POSTGRES_USER=monetizeplus
+      - POSTGRES_PASSWORD=monetizeplus123
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
@@ -138,10 +138,10 @@ services:
       - redis
       - licensing-api
     networks:
-      - tollbit-network
+      - monetizeplus-network
 
 networks:
-  tollbit-network:
+  monetizeplus-network:
     driver: bridge
 
 volumes:
