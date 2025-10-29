@@ -4,15 +4,26 @@ An educational MVP demonstrating content licensing and access control for AI bot
 
 ## 🎯 Overview
 
-This system demonstrates three core flows:
+This system demonstrates five core flows:
 
 1. **Human Access** → Unaffected, direct access to content
 2. **Unlicensed Bot** → 302 redirect to licensing/paywall  
 3. **Licensed Bot** → Short-lived token → Metered content access
+4. **AI-to-AI Negotiation** → Autonomous license negotiation between publisher agents and AI companies
+5. **License Management** → Publisher dashboard for managing licenses, URLs, policies, and viewing analytics
 
 ## 🏗️ Architecture
 
 ```
+                           ┌──────────────────────┐
+                           │ Publisher Dashboard  │ (React/Vite :5173)
+                           │ • License Manager    │
+                           │ • Negotiations UI    │
+                           │ • Usage Analytics    │
+                           │ • URL Library        │
+                           │ • Policy Tester      │
+                           └──────────┬───────────┘
+                                      │
            ┌────────────────────────────┐
            │  Mock CDN / Edge Gateway   │  (Nginx + Edge Worker)
 Request -->│  • Bot detect (UA/IP/Rate) │──┐
@@ -21,22 +32,31 @@ Request -->│  • Bot detect (UA/IP/Rate) │──┐
            └───────────┬────────────────┘  │
                        │                   │
       Humans ──────────┘                   ▼
-                                 ┌──────────────────────┐
-                                 │ Licensing Gateway    │ (Node/Express)
-                                 │ • /authorize         │
-                                 │ • Token issuance     │ (JWT/HMAC)
-                                 │ • Usage metering     │
-                                 │ • Pricing/policies   │
-                                 │ • Admin UI / logs    │
-                                 └───────────┬──────────┘
-                                             │
-                                ┌────────────┴────────────┐
-                                │                         │
-                       ┌────────▼────────┐       ┌────────▼────────┐
-                       │ Publisher A      │       │ Publisher B      │
-                       │ (Mock Website)   │       │ (Mock Website)   │
-                       │ :8081            │       │ :8082            │
-                       └──────────────────┘       └──────────────────┘
+                          ┌──────────────────────────┐
+                          │ Licensing API            │ (Node/Express :3000)
+                          │ • Token issuance (JWT)   │
+                          │ • License management     │
+                          │ • Usage metering         │
+                          │ • Content parsing        │
+                          │ • Policy enforcement     │
+                          └────────────┬─────────────┘
+                                       │
+                          ┌────────────┴──────────────┐
+                          │                           │
+               ┌──────────▼──────────┐    ┌──────────▼──────────┐
+               │ Negotiation Agent   │    │ URL Parser          │
+               │ (AI-to-AI) :3003    │    │ (Markdown) :4000    │
+               │ • Auto-negotiation  │    │ • URL→Markdown      │
+               │ • Strategy engine   │    │ • Content extract   │
+               │ • License creation  │    └─────────────────────┘
+               └─────────────────────┘
+                          │
+                ┌─────────┴────────┐
+                │                  │
+       ┌────────▼────────┐  ┌─────▼──────────┐
+       │ Publisher A      │  │ Publisher B    │
+       │ (Mock) :8081     │  │ (Mock) :8082   │
+       └──────────────────┘  └────────────────┘
 ```
 
 ## 🚀 Quick Start
@@ -45,7 +65,7 @@ Request -->│  • Bot detect (UA/IP/Rate) │──┐
 
 - Docker & Docker Compose
 - 8GB RAM recommended
-- Ports 8080, 3000, 5432, 6379 available
+- Ports 3000, 3003, 4000, 5173, 5432, 6379, 8080, 8081, 8082 available
 
 ### Start Services
 
@@ -65,8 +85,10 @@ All services should show as "Up" and healthy.
 
 ### Access Points
 
+- **Publisher Dashboard**: http://localhost:5173 (main UI)
 - **Edge Gateway**: http://localhost:8080 (main entry point)
 - **Licensing API**: http://localhost:3000
+- **Negotiation Agent**: http://localhost:3003
 - **Publisher A**: http://localhost:8080 (Host: site-a.local)
 - **Publisher B**: http://localhost:8080 (Host: site-b.local)
 - **PostgreSQL**: localhost:5432 (user: tollbit, db: tollbit)
@@ -148,7 +170,99 @@ curl -H "User-Agent: GPTBot/1.0" \
 
 **Result**: HTTP 200, content returned, usage metered
 
-## 📡 API Reference
+## �️ Publisher Dashboard
+
+The Publisher Dashboard is a modern React-based UI for managing all aspects of content licensing:
+
+### Access
+Navigate to http://localhost:5173 and log in with any publisher ID (e.g., `1` for Publisher A).
+
+### Features
+
+#### Dashboard
+- **Usage Analytics**: View request volumes, revenue trends, and top clients
+- **Real-time Metrics**: Total requests, revenue, unique clients, and average transaction values
+- **Charts**: Request volume over time, revenue trends, client distribution
+
+#### License Manager
+- **Create License Templates**: Define reusable license configurations with names
+  - License types: Training+Display, RAG Unrestricted, RAG Max Words, RAG Attribution, RAG No Display
+  - Pricing: Set price per fetch and currency (USD/EUR/GBP)
+  - Terms: Specify term length and revenue share percentage
+  - Special conditions: Max word counts, attribution requirements
+- **Edit Licenses**: Modify existing license templates
+- **Clone Licenses**: Duplicate licenses for quick creation
+- **License Naming**: All licenses require descriptive names (negotiation-created licenses auto-named as `partner_usecase_price`)
+
+#### URL Library
+- **Manage URLs**: Add, view, and organize your content URLs
+- **Assign Licenses**: Link licenses to specific URLs
+- **Content Parsing**: Parse URLs to extract markdown content
+- **Access Endpoints**: Configure API, RSS, HTML, MCP, and NLWeb access methods
+- **Search & Sort**: Find URLs by title, description, or URL pattern
+
+#### Negotiations
+- **View Negotiations**: See all incoming negotiation requests from AI companies
+- **Accept/Reject**: Review and respond to proposed terms
+- **Auto-License Creation**: Accepting a negotiation automatically creates a named license
+- **Negotiation History**: Track all rounds and final terms
+- **Strategy Management**: Configure your negotiation strategy (pricing, thresholds, deal-breakers)
+
+#### Usage Logs
+- **Detailed Access Logs**: View every request with timestamp, client, URL, cost, and purpose
+- **Filter & Search**: Find specific usage events
+- **Cost Tracking**: Monitor per-request costs and cumulative totals
+
+#### Notifications
+- **Real-time Alerts**: Get notified of negotiation events, license creation, and system updates
+- **Unread Counter**: Badge showing unread notification count in sidebar
+- **Filter by Type**: View all, unread, license, or negotiation notifications
+- **Mark as Read/Delete**: Manage notification states
+
+#### Policy Tester
+- **Test Bot Detection**: Simulate requests with different user agents
+- **Policy Validation**: Verify your policies work correctly
+- **Response Preview**: See what bots will receive (redirect, allow, block)
+
+## 🤖 AI-to-AI Negotiation System
+
+The negotiation agent enables autonomous license negotiation between publishers and AI companies.
+
+### How It Works
+
+1. **AI Company Initiates**: Sends a negotiation request with proposed terms
+2. **Publisher Agent Evaluates**: Uses configured strategy to assess proposal
+3. **Multi-Round Negotiation**: Agents counter-propose until agreement or rejection
+4. **Auto-Accept**: If proposal meets threshold, automatically accepts
+5. **License Creation**: Successful negotiation creates a named license (format: `partner_usecase_price`)
+
+### Negotiation Strategy
+
+Configure via Dashboard → Negotiations → Strategies:
+- **Min/Preferred/Max Price**: Price boundaries for negotiation
+- **Auto-Accept Threshold**: Automatically accept proposals ≥X% of preferred terms
+- **Negotiation Style**: Aggressive, balanced, flexible, or cooperative
+- **Max Rounds**: Limit negotiation length
+- **Deal Breakers**: Conditions that trigger auto-rejection
+
+### API Endpoints
+
+#### `POST /api/negotiations/initiate`
+Start a new negotiation (called by AI companies).
+
+#### `GET /api/negotiations/publisher/:publisherId`
+List all negotiations for a publisher.
+
+#### `GET /api/negotiations/:negotiationId`
+Get detailed negotiation history with all rounds.
+
+#### `POST /api/negotiations/:negotiationId/accept`
+Accept negotiation terms and create license.
+
+#### `POST /api/negotiations/:negotiationId/reject`
+Reject negotiation with optional reason.
+
+## �📡 API Reference
 
 ### Public Endpoints (Bots)
 
@@ -202,6 +316,84 @@ Verify a token's validity.
 }
 ```
 
+### License Management Endpoints
+
+#### `GET /api/licenses?publisherId={id}`
+List all licenses for a publisher.
+
+**Response**:
+```json
+{
+  "success": true,
+  "licenses": [
+    {
+      "id": 1,
+      "name": "openai_training_display_0_0100",
+      "license_type": 0,
+      "price": 0.0100,
+      "currency": "USD",
+      "term_months": 12,
+      "status": "active",
+      "created_ts": "2025-10-29T12:00:00Z"
+    }
+  ]
+}
+```
+
+#### `POST /api/licenses`
+Create a new license template.
+
+**Request Body**:
+```json
+{
+  "publisher_id": 1,
+  "name": "anthropic_rag_unrestricted_0_0085",
+  "license_type": 1,
+  "price": 0.0085,
+  "currency": "USD",
+  "term_months": 12,
+  "status": "active"
+}
+```
+
+#### `PUT /api/licenses/:id`
+Update an existing license.
+
+#### `DELETE /api/licenses/:id`
+Delete a license template.
+
+#### `POST /api/licenses/:id/clone`
+Clone an existing license.
+
+### Content & URL Management Endpoints
+
+#### `GET /parsed-urls?publisherId={id}`
+List parsed URLs for a publisher.
+
+#### `POST /api/content/from-url`
+Create content entry from URL and assign license.
+
+**Request Body**:
+```json
+{
+  "url": "https://example.com/article",
+  "publisherId": 1,
+  "licenseId": 5,
+  "title": "Article Title",
+  "description": "Article description"
+}
+```
+
+#### `POST /parse`
+Parse a URL to extract markdown content.
+
+**Request Body**:
+```json
+{
+  "url": "https://example.com/article"
+}
+```
+
 ### Admin Endpoints
 
 #### `GET /admin/publishers`
@@ -210,20 +402,8 @@ List all publishers.
 #### `GET /admin/clients`
 List all registered AI clients.
 
-#### `GET /admin/plans`
-List pricing plans.
-
 #### `POST /admin/clients`
 Create a new client.
-
-**Request Body**:
-```json
-{
-  "name": "New AI Company",
-  "contact_email": "contact@ai-company.com",
-  "plan_id": 2
-}
-```
 
 #### `POST /admin/tokens/:jti/revoke`
 Revoke a specific token.
@@ -291,6 +471,70 @@ Record usage event (internal, called by edge-worker).
 id, name, hostname, created_at
 ```
 
+### License Options
+```sql
+id, license_id, name, content_id, publisher_id, license_type,
+price, currency, term_months, revshare_pct, max_word_count,
+attribution_required, attribution_text, attribution_url,
+derivative_allowed, status, ext, created_ts, updated_ts
+```
+
+**License Types**:
+- `0`: Training + Display
+- `1`: RAG Display (Unrestricted)
+- `2`: RAG Display (Max Words)
+- `3`: RAG Display (Attribution)
+- `4`: RAG No Display
+
+### Negotiations
+```sql
+id (UUID), publisher_id, client_id, client_name, strategy_id,
+status, current_round, initial_proposal, current_terms, final_terms,
+license_id, initiated_by, initiated_at, completed_at, last_activity_at,
+context, created_at, updated_at
+```
+
+**Statuses**: `initiated`, `negotiating`, `accepted`, `rejected`, `timeout`, `error`
+
+### Negotiation Strategies
+```sql
+id, publisher_id, strategy_name, negotiation_style,
+min_price_per_fetch_micro, preferred_price_per_fetch_micro, max_price_per_fetch_micro,
+min_token_ttl_seconds, preferred_token_ttl_seconds, max_token_ttl_seconds,
+min_burst_rps, preferred_burst_rps, max_burst_rps,
+allowed_purposes, preferred_purposes, deal_breakers,
+max_rounds, auto_accept_threshold, timeout_seconds,
+llm_provider, llm_model, llm_temperature, system_prompt,
+is_active, created_at, updated_at
+```
+
+### Negotiation Rounds
+```sql
+id, negotiation_id, round_number, actor, action,
+proposed_terms, reasoning, llm_model, llm_tokens_used,
+llm_response_time_ms, analysis, created_at
+```
+
+### Parsed URLs
+```sql
+id, publisher_id, url, content, title, description,
+fetch_count, last_fetched, created_at, updated_at
+```
+
+### Content
+```sql
+id, publisher_id, url, content_origin, title, summary,
+license_id, created_ts, updated_ts
+```
+
+### Notifications
+```sql
+id, publisher_id, type, title, message, metadata,
+category, entity_id, is_read, created_at
+```
+
+**Notification Types**: `negotiation_initiated`, `negotiation_accepted`, `negotiation_rejected`, `license_created`, `system`
+
 ### Policies
 ```sql
 id, publisher_id, policy_json, version, created_at
@@ -335,7 +579,7 @@ id, publisher_id, policy_json, version, created_at
 ### Usage Events
 ```sql
 id, ts, publisher_id, client_id, url, agent_ua, 
-cost_micro, token_id, bytes_sent, purpose
+cost_micro, token_id, bytes_sent, purpose, license_id
 ```
 
 ## 🔧 Configuration
@@ -469,25 +713,70 @@ KEYS token:*
 │       ├── server.js           # Express server
 │       ├── db.js               # Database connection
 │       ├── redis.js            # Redis client
+│       ├── models/
+│       │   ├── LicenseOption.js  # License CRUD operations
+│       │   └── Content.js        # Content management
 │       └── routes/
-│           ├── auth.js         # Token endpoints
-│           ├── policies.js     # Policy management
-│           ├── usage.js        # Usage tracking
-│           └── admin.js        # Admin endpoints
-├── publisher-a/                # Mock publisher site
+│           ├── auth.js           # Token endpoints
+│           ├── policies.js       # Policy management
+│           ├── usage.js          # Usage tracking
+│           ├── admin.js          # Admin endpoints
+│           ├── licenses.js       # License management
+│           ├── content.js        # Content & URL management
+│           ├── access.js         # Access endpoint config
+│           └── notifications.js  # Notification system
+├── negotiation-agent/
+│   ├── Dockerfile
+│   ├── package.json
+│   └── src/
+│       ├── server.js             # Express server & Socket.IO
+│       ├── negotiation-engine.js # AI negotiation logic
+│       ├── notifications.js      # Notification helpers
+│       └── logger.js             # Winston logging
+├── publisher-dashboard/
+│   ├── Dockerfile
+│   ├── nginx.conf                # Nginx reverse proxy config
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── src/
+│       ├── App.jsx               # Main React app
+│       ├── components/
+│       │   └── Layout.jsx        # Main layout with nav
+│       └── pages/
+│           ├── Login.jsx         # Publisher login
+│           ├── Dashboard.jsx     # Analytics & metrics
+│           ├── LicenseWizard.jsx # License management
+│           ├── UrlLibrary.jsx    # URL & content management
+│           ├── Negotiations.jsx  # Negotiation UI
+│           ├── UsageLogs.jsx     # Access logs
+│           ├── Notifications.jsx # Notification center
+│           └── PolicyTester.jsx  # Policy testing tool
+├── Simple Parser/
+│   └── url-to-markdown/          # URL parsing service
+│       ├── Dockerfile
+│       ├── package.json
+│       └── src/
+│           └── server.js         # Express server
+├── publisher-a/                  # Mock publisher site
 │   ├── Dockerfile
 │   ├── nginx.conf
 │   └── html/
-├── publisher-b/                # Mock publisher site
+├── publisher-b/                  # Mock publisher site
 │   ├── Dockerfile
 │   ├── nginx.conf
 │   └── html/
 ├── database/
-│   └── init.sql                # Database schema & seed
+│   ├── init.sql                  # Initial schema & seed data
+│   └── migrations/               # Database migrations
+│       ├── 009_negotiation_system.sql
+│       ├── 010_partner_strategies.sql
+│       ├── 019_add_license_name.sql
+│       └── ...
 └── tests/
-    ├── run-tests.sh            # Automated tests (Bash)
-    ├── run-tests.ps1           # Automated tests (PowerShell)
-    └── MANUAL_TESTS.md         # Manual test guide
+    ├── run-tests.sh              # Automated tests (Bash)
+    ├── run-tests.ps1             # Automated tests (PowerShell)
+    └── MANUAL_TESTS.md           # Manual test guide
 ```
 
 ### Adding a New Publisher
@@ -589,6 +878,12 @@ docker exec -it tollbit-redis redis-cli
 6. **Microservices Architecture**: Independent, composable services
 7. **Reverse Proxy**: Nginx as traffic router
 8. **API Design**: RESTful endpoints with clear contracts
+9. **AI-to-AI Negotiation**: Autonomous license negotiation using LLMs
+10. **Real-time Communication**: WebSockets (Socket.IO) for live updates
+11. **Modern Frontend**: React + Vite + Tailwind CSS
+12. **Database Migrations**: Versioned schema evolution
+13. **Content Parsing**: URL-to-Markdown extraction
+14. **Named Licenses**: Human-readable license identifiers with auto-generation
 
 ### Related Technologies
 

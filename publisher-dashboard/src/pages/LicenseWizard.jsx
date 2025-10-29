@@ -10,7 +10,7 @@ export default function LicenseManager({ publisherId }) {
   const [licenseTypes, setLicenseTypes] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
-    license_type: 0,
+    license_types: [0], // Changed to array to support multiple types
     price: '',
     currency: 'USD',
     term_months: 12,
@@ -44,17 +44,33 @@ export default function LicenseManager({ publisherId }) {
   const handleCreate = async (e) => {
     e.preventDefault();
     
+    // Validate required fields
+    if (!formData.name || formData.name.trim() === '') {
+      alert('License name is required');
+      return;
+    }
+    
+    if (!formData.license_types || formData.license_types.length === 0) {
+      alert('Please select at least one license type');
+      return;
+    }
+    
     // Validate conditional fields
-    if (formData.license_type === 2 && !formData.max_word_count) {
+    if (formData.license_types.includes(2) && !formData.max_word_count) {
       alert('RAG Max Words license type requires a maximum word count');
+      return;
+    }
+    
+    if (formData.license_types.includes(3) && !formData.attribution_required) {
+      alert('RAG Attribution license type requires attribution to be enabled');
       return;
     }
     
     try {
       const payload = {
         publisher_id: publisherId,
-        name: formData.name || null,
-        license_type: formData.license_type,
+        name: formData.name.trim(),
+        license_types: formData.license_types, // Send array of types
         price: parseFloat(formData.price),
         currency: formData.currency,
         status: formData.status,
@@ -146,6 +162,7 @@ export default function LicenseManager({ publisherId }) {
   const handleEdit = (license) => {
     setEditingLicense(license);
     setFormData({
+      name: license.name || '',
       license_type: license.license_type,
       price: license.price.toString(),
       currency: license.currency,
@@ -246,7 +263,7 @@ export default function LicenseManager({ publisherId }) {
                 <tr key={license.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-900">
-                      {license.license_name || `License #${license.id}`}
+                      {license.name || `License #${license.id}`}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -332,6 +349,21 @@ export default function LicenseManager({ publisherId }) {
               
               <form onSubmit={handleCreate}>
                 <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      License Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      placeholder="e.g., anthropic_rag_unrestricted_0_0085"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Use a descriptive name. Licenses from negotiations are auto-named as partner_usecase_price.</p>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       License Type <span className="text-red-500">*</span>

@@ -11,13 +11,15 @@ class LicenseOption {
       price = 0, currency = 'USD', term_months, revshare_pct,
       max_word_count, attribution_required = false,
       attribution_text, attribution_url, derivative_allowed = true,
-      status = 'active', ext = {}
+      status = 'active', ext = {}, name = null
     } = data;
     
     // Validate required fields
-    if (!license_id || !publisher_id || license_type === undefined) {
-      throw new Error('license_id, publisher_id, and license_type are required');
+    if (!publisher_id || license_type === undefined) {
+      throw new Error('publisher_id and license_type are required');
     }
+    // Generate a license_id if not provided
+    const newLicenseId = license_id || `lic_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
     
     // Validate conditional fields
     const errors = this.validateSchema({
@@ -32,14 +34,14 @@ class LicenseOption {
       INSERT INTO license_options (
         license_id, content_id, publisher_id, license_type, price, currency,
         term_months, revshare_pct, max_word_count, attribution_required,
-        attribution_text, attribution_url, derivative_allowed, status, ext
+        attribution_text, attribution_url, derivative_allowed, name, status, ext
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING *
     `, [
-      license_id, content_id, publisher_id, license_type, price, currency,
+      newLicenseId, content_id, publisher_id, license_type, price, currency,
       term_months, revshare_pct, max_word_count, attribution_required,
-      attribution_text, attribution_url, derivative_allowed, status, JSON.stringify(ext)
+      attribution_text, attribution_url, derivative_allowed, name, status, JSON.stringify(ext)
     ]);
     
     const license = result.rows[0];
@@ -148,7 +150,7 @@ class LicenseOption {
     let paramCount = 0;
     
     const allowedFields = [
-      'price', 'currency', 'term_months', 'revshare_pct', 'max_word_count',
+      'name', 'price', 'currency', 'term_months', 'revshare_pct', 'max_word_count',
       'attribution_required', 'attribution_text', 'attribution_url',
       'derivative_allowed', 'status', 'ext'
     ];
@@ -227,6 +229,7 @@ class LicenseOption {
       license_id: newData.license_id || `${original.license_id}_copy_${Date.now()}`,
       content_id: newData.content_id || original.content_id,
       publisher_id: original.publisher_id,
+      name: newData.name || (original.name ? `${original.name} (Copy)` : null),
       license_type: newData.license_type !== undefined ? newData.license_type : original.license_type,
       price: newData.price !== undefined ? newData.price : original.price,
       currency: newData.currency || original.currency,

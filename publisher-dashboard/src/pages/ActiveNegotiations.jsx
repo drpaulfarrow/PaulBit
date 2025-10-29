@@ -266,12 +266,18 @@ export default function ActiveNegotiations() {
                         <div className="text-sm text-gray-600">
                           Current Terms: 
                           <span className="ml-2 font-medium text-gray-900">
-                            {formatPrice(negotiation.current_terms.price_per_fetch_micro)}
+                            {negotiation.current_terms.price_per_fetch_micro 
+                              ? formatPrice(negotiation.current_terms.price_per_fetch_micro)
+                              : negotiation.current_terms.price
+                              ? `$${parseFloat(negotiation.current_terms.price).toFixed(4)}`
+                              : negotiation.current_terms.preferred_price
+                              ? `$${parseFloat(negotiation.current_terms.preferred_price).toFixed(4)}`
+                              : '$0.0000'}
                           </span>
                           <span className="mx-2">•</span>
-                          <span>{negotiation.current_terms.token_ttl_seconds}s TTL</span>
+                          <span>{negotiation.current_terms.token_ttl_seconds || negotiation.current_terms.preferred_token_ttl_seconds || 0}s TTL</span>
                           <span className="mx-2">•</span>
-                          <span>{negotiation.current_terms.burst_rps} RPS</span>
+                          <span>{negotiation.current_terms.burst_rps || negotiation.current_terms.preferred_burst_rps || 0} RPS</span>
                         </div>
                       </div>
                     )}

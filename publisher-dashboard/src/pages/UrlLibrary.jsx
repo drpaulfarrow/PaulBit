@@ -212,8 +212,8 @@ function UrlLibrary() {
   };
 
   const getLicenseDisplayName = (license) => {
-    // Use license_name if available, otherwise use license_id or generate a name
-    const name = license.license_name || license.license_id || `License #${license.id}`;
+    // Use name if available, otherwise use license_id or generate a name
+    const name = license.name || license.license_id || `License #${license.id}`;
     const typeName = getLicenseTypeName(license.license_type);
     const price = parseFloat(license.price).toFixed(4);
     return `${name} (${typeName} - $${price} ${license.currency})`;

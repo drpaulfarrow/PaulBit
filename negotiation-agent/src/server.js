@@ -286,6 +286,23 @@ app.post('/api/negotiations/:negotiationId/accept', async (req, res) => {
     // Create license from negotiated terms
     // Generate a unique license_id
     const licenseId = `lic_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    // Auto-generate a human-friendly name: partner_usecase_price
+    const typeNames = {
+      0: 'training_display',
+      1: 'rag_unrestricted',
+      2: 'rag_max_words',
+      3: 'rag_attribution',
+      4: 'rag_no_display'
+    };
+    const chosenType = negotiation.license_type || 1;
+    const usecaseSlug = typeNames[chosenType] || 'license';
+    const rawPrice = terms.price || terms.preferred_price || 0.005;
+    const priceSlug = Number(rawPrice).toFixed(4).toString().replace(/[^0-9]+/g, '_');
+    const clientSlug = (negotiation.client_name || 'partner')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+    const autoName = `${clientSlug}_${usecaseSlug}_${priceSlug}`;
     
     const licenseInsert = await db.query(`
       INSERT INTO license_options (
@@ -294,18 +311,20 @@ app.post('/api/negotiations/:negotiationId/accept', async (req, res) => {
         license_type,
         price,
         currency,
+        name,
         status,
         term_months,
         max_word_count,
         attribution_required
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *
     `, [
       licenseId,
       publisherId,
-      negotiation.license_type || 1,
-      terms.price || terms.preferred_price || 0.005,
+      chosenType,
+      rawPrice,
       terms.currency || 'USD',
+      autoName,
       'active',
       terms.term_months || 12,
       terms.max_word_count || null,
