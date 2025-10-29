@@ -1,23 +1,43 @@
 version: '3.8'
 
 services:
-  # Nginx edge gateway - entry point for all traffic
   edge:
     image: nginx:alpine
-    container_name: monetizeplus-edge
     ports:
-      - "8080:8080"
-    volumes:
-      - ./edge/nginx.conf:/etc/nginx/nginx.conf:ro
+      - "80:8080"
     depends_on:
       - edge-worker
     networks:
-      - monetizeplus-network
+      - tollbit-network
+    command: >
+      /bin/sh -c "cat > /etc/nginx/nginx.conf <<'EOF'
+      worker_processes auto;
+      events { worker_connections 1024; }
 
-  # Edge worker - bot detection and routing logic
+      http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+        sendfile        on;
+        keepalive_timeout  65;
+
+        server {
+          listen 8080;
+          server_name _;
+
+          location / {
+            proxy_pass http://edge-worker:3000;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \$scheme;
+          }
+        }
+      }
+      EOF
+      && nginx -g 'daemon off;'"
+      
   edge-worker:
-    build: ./edge-worker
-    container_name: monetizeplus-edge-worker
+    image: paulandrewfarrow/tollbit-edge-worker:latest
     environment:
       - NODE_ENV=development
       - LICENSING_API_URL=http://licensing-api:3000
@@ -28,18 +48,14 @@ services:
       - licensing-api
       - redis
     networks:
-      - monetizeplus-network
+      - tollbit-network
 
-  # Licensing API - authentication, tokens, metering, policies
   licensing-api:
-    build: ./licensing-api
-    container_name: monetizeplus-licensing-api
-    ports:
-      - "3000:3000"
+    image: paulandrewfarrow/tollbit-licensing-api:latest
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - DATABASE_URL=postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
+      - DATABASE_URL=postgresql://tollbit:tollbit123@postgres:5432/tollbit
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=your-secret-key-change-in-production
       - JWT_ISSUER=gatehouse-licensing
@@ -48,101 +64,26 @@ services:
       - postgres
       - redis
     networks:
-      - monetizeplus-network
+      - tollbit-network
 
-  # Publisher A - mock content site
-  publisher-a:
-    build: ./publisher-a
-    container_name: monetizeplus-publisher-a
-    networks:
-      - monetizeplus-network
-
-  # Publisher B - mock content site
-  publisher-b:
-    build: ./publisher-b
-    container_name: monetizeplus-publisher-b
-    networks:
-      - monetizeplus-network
-
-  # PostgreSQL database
   postgres:
     image: postgres:15-alpine
-    container_name: monetizeplus-postgres
     environment:
-      - POSTGRES_DB=monetizeplus
-      - POSTGRES_USER=monetizeplus
-      - POSTGRES_PASSWORD=monetizeplus123
+      - POSTGRES_DB=tollbit
+      - POSTGRES_USER=tollbit
+      - POSTGRES_PASSWORD=tollbit123
+    networks:
+      - tollbit-network
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5432:5432"
-    networks:
-      - monetizeplus-network
 
-  # Redis for rate limiting and token cache
   redis:
     image: redis:7-alpine
-    container_name: monetizeplus-redis
-    ports:
-      - "6379:6379"
     networks:
-      - monetizeplus-network
-
-  # Publisher Dashboard - UI for managing policies and viewing analytics
-  publisher-dashboard:
-    build: ./publisher-dashboard
-    container_name: monetizeplus-publisher-dashboard
-    ports:
-      - "5173:5173"
-    depends_on:
-      - licensing-api
-    networks:
-      - monetizeplus-network
-
-  # URL-to-Markdown Parser - grounding API for search/copilot systems
-  url-parser:
-    build: ./Simple Parser/url-to-markdown
-    container_name: monetizeplus-url-parser
-    ports:
-      - "4000:4000"
-    environment:
-      - NODE_ENV=production
-      - PORT=4000
-      - CORS_ORIGINS=http://localhost:5173
-    networks:
-      - monetizeplus-network
-
-  # Negotiation Agent - AI-to-AI autonomous license negotiation
-  negotiation-agent:
-    build: ./negotiation-agent
-    container_name: monetizeplus-negotiation-agent
-    ports:
-      - "3003:3003"
-    environment:
-      - NODE_ENV=production
-      - PORT=3003
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=monetizeplus
-      - POSTGRES_USER=monetizeplus
-      - POSTGRES_PASSWORD=monetizeplus123
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - LOG_LEVEL=info
-      - START_MCP=false
-    depends_on:
-      - postgres
-      - redis
-      - licensing-api
-    networks:
-      - monetizeplus-network
+      - tollbit-network
 
 networks:
-  monetizeplus-network:
-    driver: bridge
+  tollbit-network:
 
 volumes:
   postgres-data:
