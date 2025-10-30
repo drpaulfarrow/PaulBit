@@ -28,7 +28,7 @@ az webapp config appsettings set \
   --settings \
     REDIS_ENABLED=false \
     NODE_ENV=production \
-    DATABASE_URL="postgresql://monetizeplus:monetizeplus123@127.0.0.1:5432/monetizeplus" \
+    DATABASE_URL="postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus" \
     JWT_SECRET="$JWT_SECRET" \
     JWT_ISSUER=monetizeplus \
     JWT_AUDIENCE=monetizeplus-edge
@@ -63,7 +63,7 @@ az webapp config appsettings set \
   --settings \
     REDIS_ENABLED=false \
     NODE_ENV=production \
-    DATABASE_URL="postgresql://monetizeplus:monetizeplus123@127.0.0.1:5432/monetizeplus" \
+    DATABASE_URL="postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus" \
     JWT_SECRET="$JWT_SECRET" \
     JWT_ISSUER=monetizeplus \
     JWT_AUDIENCE=monetizeplus-edge && \

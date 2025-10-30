@@ -15,34 +15,45 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
+    restart: unless-stopped
 
   # Licensing API - authentication, tokens, metering, policies
   licensing-api:
     image: paulandrewfarrow/monetizeplus-licensing-api:latest
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://monetizeplus:monetizeplus123@127.0.0.1:5432/monetizeplus
+      DATABASE_URL: postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
       REDIS_ENABLED: "false"
       JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: monetizeplus
       JWT_AUDIENCE: monetizeplus-edge
+      PORT: "3000"
     ports:
       - "3000:3000"
+    restart: unless-stopped
 
   # URL-to-Markdown Parser
   urlparser:
     image: paulandrewfarrow/monetizeplus-url-parser:latest
+    environment:
+      PORT: "4000"
     ports:
-      - "8080:80"
+      - "4000:4000"
+    restart: unless-stopped
 
   # Publisher Dashboard
   publisher-dashboard:
     image: paulandrewfarrow/monetizeplus-publisher-dashboard:latest
     depends_on:
       - licensing-api
+      - urlparser
     ports:
       - "80:80"
     environment:
-      LICENSING_API_URL: http://127.0.0.1:3000
+      LICENSING_API_URL: http://licensing-api:3000
+      URL_PARSER_URL: http://urlparser:4000
+    restart: unless-stopped
