@@ -8,7 +8,7 @@ echo "Generated JWT_SECRET (save this securely): $JWT_SECRET"
 
 ## Step 2: Download compose file
 ```bash
-curl -O https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/docker-compose.azure.yml
+curl -O https://raw.githubusercontent.com/paulandrewfarrow/MonetizePlus/main/docker-compose.azure.yml
 ```
 
 ## Step 3: Deploy configuration (no ACR needed - using public Docker Hub images)
@@ -51,7 +51,7 @@ az webapp log tail \
 ## One-Command Deployment
 ```bash
 JWT_SECRET=$(openssl rand -base64 32) && \
-curl -O https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/docker-compose.azure.yml && \
+curl -O https://raw.githubusercontent.com/paulandrewfarrow/MonetizePlus/main/docker-compose.azure.yml && \
 az webapp config container set \
   --name monetizeplusapp \
   --resource-group MonetizePlusRG \
