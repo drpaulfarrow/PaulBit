@@ -98,7 +98,7 @@ echo ""
 
 # Step 10: Update to versioned images (forces Azure to pull new versions)
 echo "📝 Step 10: Updating to versioned image tags..."
-echo "ℹ️  Using image version: 20251030-113911"
+echo "ℹ️  Using image version: 20251030-121415 (includes init.sql)"
 echo "✅ Image versions updated in docker-compose.azure.yml"
 echo ""
 
