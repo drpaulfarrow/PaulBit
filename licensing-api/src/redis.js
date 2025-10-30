@@ -1,14 +1,14 @@
 const redis = require('redis');
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://redis:6379';
-const REDIS_ENABLED = process.env.REDIS_ENABLED !== 'false';
+const REDIS_ENABLED = process.env.REDIS_ENABLED === 'true';
 
 let client = null;
 let redisAvailable = false;
 
 async function initialize() {
   if (!REDIS_ENABLED) {
-    console.log('Redis disabled by configuration');
+    console.log('ℹ️  Redis disabled by configuration (REDIS_ENABLED=false)');
     return;
   }
 
@@ -21,16 +21,21 @@ async function initialize() {
       }
     });
     
+    // Only log errors once during initialization
+    let errorLogged = false;
     client.on('error', (err) => {
-      console.error('Redis Client Error:', err);
+      if (!errorLogged) {
+        console.error('Redis Client Error:', err.message);
+        errorLogged = true;
+      }
       redisAvailable = false;
     });
     
     await client.connect();
     redisAvailable = true;
-    console.log('Redis connected');
+    console.log('✅ Redis connected');
   } catch (error) {
-    console.warn('Redis connection failed, running without cache:', error.message);
+    console.warn('⚠️  Redis connection failed, running without cache:', error.message);
     redisAvailable = false;
     client = null;
   }
