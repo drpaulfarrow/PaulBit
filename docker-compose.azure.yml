@@ -4,49 +4,45 @@ services:
   # PostgreSQL database
   postgres:
     image: postgres:15-alpine
-    container_name: monetizeplus-postgres
     environment:
-      - POSTGRES_DB=monetizeplus
-      - POSTGRES_USER=monetizeplus
-      - POSTGRES_PASSWORD=monetizeplus123
+      POSTGRES_USER: monetizeplus
+      POSTGRES_PASSWORD: monetizeplus123
+      POSTGRES_DB: monetizeplus
     ports:
       - "5432:5432"
-    # Note: Volumes removed for Azure App Service compatibility
-    # Use Azure Database for PostgreSQL for production
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U monetizeplus"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Licensing API - authentication, tokens, metering, policies
   licensing-api:
-    build: ./licensing-api
-    container_name: monetizeplus-licensing-api
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - DATABASE_URL=postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
-      - REDIS_ENABLED=false
-      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
-      - JWT_ISSUER=gatehouse-licensing
-      - JWT_AUDIENCE=gatehouse-edge
+    image: paulandrewfarrow/monetizeplus-licensing-api:latest
     depends_on:
       - postgres
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://monetizeplus:monetizeplus123@127.0.0.1:5432/monetizeplus
+      REDIS_ENABLED: "false"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: monetizeplus
+      JWT_AUDIENCE: monetizeplus-edge
+    ports:
+      - "3000:3000"
 
   # URL-to-Markdown Parser
-  url-parser:
-    build: ./Simple Parser/url-to-markdown
-    container_name: monetizeplus-url-parser
+  urlparser:
+    image: paulandrewfarrow/monetizeplus-url-parser:latest
     ports:
-      - "4000:4000"
-    environment:
-      - NODE_ENV=production
-      - PORT=4000
+      - "8080:80"
 
   # Publisher Dashboard
   publisher-dashboard:
-    build: ./publisher-dashboard
-    container_name: monetizeplus-publisher-dashboard
-    ports:
-      - "80:80"
+    image: paulandrewfarrow/monetizeplus-publisher-dashboard:latest
     depends_on:
       - licensing-api
-      - url-parser
+    ports:
+      - "80:80"
+    environment:
+      LICENSING_API_URL: http://127.0.0.1:3000
