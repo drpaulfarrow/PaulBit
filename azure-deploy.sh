@@ -71,6 +71,13 @@ az webapp config container set \
   --resource-group $RESOURCE_GROUP \
   --multicontainer-config-type compose \
   --multicontainer-config-file docker-compose.azure.yml
+
+# Force image refresh by updating a dummy app setting
+az webapp config appsettings set \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --settings DOCKER_REGISTRY_SERVER_URL=https://index.docker.io/v1 > /dev/null
+
 echo "✅ Container settings configured"
 echo ""
 
@@ -89,33 +96,42 @@ az webapp config appsettings set \
 echo "✅ Environment variables set"
 echo ""
 
-# Step 8: Restart the app
-echo "📝 Step 8: Restarting application..."
+# Step 8: Enable continuous deployment (pulls latest images)
+echo "📝 Step 8: Enabling continuous deployment..."
+az webapp deployment container config \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --enable-cd true > /dev/null
+echo "✅ Continuous deployment enabled"
+echo ""
+
+# Step 9: Restart the app (forces image pull)
+echo "📝 Step 9: Restarting application and pulling latest images..."
 az webapp restart \
   --name $APP_NAME \
   --resource-group $RESOURCE_GROUP
 echo "✅ Application restarted"
 echo ""
 
-# Step 9: Wait for app to start
-echo "📝 Step 9: Waiting for application to start (60 seconds)..."
+# Step 10: Wait for app to start
+echo "📝 Step 10: Waiting for application to start (60 seconds)..."
 sleep 60
 echo "✅ Application should be running"
 echo ""
 
-# Step 10: Get app URL
+# Step 11: Get app URL
 APP_URL=$(az webapp show --name $APP_NAME --resource-group $RESOURCE_GROUP --query defaultHostName -o tsv)
-echo "📝 Step 10: Application URL: https://$APP_URL"
+echo "📝 Step 11: Application URL: https://$APP_URL"
 echo ""
 
-# Step 11: Initialize database
-echo "📝 Step 11: Initializing database..."
+# Step 12: Initialize database
+echo "📝 Step 12: Initializing database..."
 INIT_RESPONSE=$(curl -sS -X POST "https://$APP_URL/admin/init-db")
 echo "$INIT_RESPONSE" | grep -q '"success":true' && echo "✅ Database initialized successfully" || echo "⚠️  Database initialization may have failed. Check response: $INIT_RESPONSE"
 echo ""
 
-# Step 12: Check database status
-echo "📝 Step 12: Checking database status..."
+# Step 13: Check database status
+echo "📝 Step 13: Checking database status..."
 STATUS_RESPONSE=$(curl -sS "https://$APP_URL/admin/db-status")
 echo "$STATUS_RESPONSE"
 echo ""
