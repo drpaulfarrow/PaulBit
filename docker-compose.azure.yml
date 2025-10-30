@@ -20,7 +20,7 @@ services:
 
   # Licensing API - authentication, tokens, metering, policies
   licensing-api:
-    image: paulandrewfarrow/monetizeplus-licensing-api:20251030-113911
+    image: paulandrewfarrow/monetizeplus-licensing-api:20251030-121415
     depends_on:
       postgres:
         condition: service_healthy
