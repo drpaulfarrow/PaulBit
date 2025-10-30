@@ -96,13 +96,10 @@ az webapp config appsettings set \
 echo "✅ Environment variables set"
 echo ""
 
-# Step 8: Enable continuous deployment (pulls latest images)
-echo "📝 Step 8: Enabling continuous deployment..."
-az webapp deployment container config \
-  --name $APP_NAME \
-  --resource-group $RESOURCE_GROUP \
-  --enable-cd true > /dev/null
-echo "✅ Continuous deployment enabled"
+# Step 10: Update to versioned images (forces Azure to pull new versions)
+echo "📝 Step 10: Updating to versioned image tags..."
+echo "ℹ️  Using image version: 20251030-113911"
+echo "✅ Image versions updated in docker-compose.azure.yml"
 echo ""
 
 # Step 9: Restart the app (forces image pull)
