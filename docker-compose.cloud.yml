@@ -1,10 +1,47 @@
-version: '3'
+version: "3.8"
+
 services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: tollbit
+      POSTGRES_PASSWORD: tollbit123
+      POSTGRES_DB: tollbit
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
   licensing-api:
     image: paulandrewfarrow/tollbit-licensing-api:latest
+    depends_on:
+      - postgres
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://tollbit:tollbit123@postgres:5432/tollbit
     ports:
       - "3000:3000"
-  urlparser:
+
+  url-parser:
     image: paulandrewfarrow/tollbit-url-parser:latest
+    depends_on:
+      - licensing-api
+    environment:
+      NODE_ENV: production
+      API_URL: http://licensing-api:3000
+    ports:
+      - "4000:4000"
+
+  publisher-dashboard:
+    image: paulandrewfarrow/tollbit-publisher-dashboard:latest
+    depends_on:
+      - licensing-api
+      - url-parser
+    environment:
+      NODE_ENV: production
+      API_URL: http://licensing-api:3000
+      PARSER_URL: http://url-parser:4000
     ports:
       - "80:80"
+
+volumes:
+  pgdata:
