@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    container_name: monetizeplus-postgres
+    environment:
+      - POSTGRES_DB=monetizeplus
+      - POSTGRES_USER=monetizeplus
+      - POSTGRES_PASSWORD=monetizeplus123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # Licensing API - authentication, tokens, metering, policies
+  licensing-api:
+    build: ./licensing-api
+    container_name: monetizeplus-licensing-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
+      - REDIS_ENABLED=false
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
+      - JWT_ISSUER=gatehouse-licensing
+      - JWT_AUDIENCE=gatehouse-edge
+    depends_on:
+      - postgres
+
+  # URL-to-Markdown Parser
+  url-parser:
+    build: ./Simple Parser/url-to-markdown
+    container_name: monetizeplus-url-parser
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+
+  # Publisher Dashboard
+  publisher-dashboard:
+    build: ./publisher-dashboard
+    container_name: monetizeplus-publisher-dashboard
+    ports:
+      - "80:80"
+    depends_on:
+      - licensing-api
+      - url-parser
+
+volumes:
+  postgres-data:
