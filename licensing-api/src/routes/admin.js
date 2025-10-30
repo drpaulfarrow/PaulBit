@@ -1,6 +1,8 @@
 const express = require('express');
 const db = require('../db');
 const redis = require('../redis');
+const fs = require('fs');
+const path = require('path');
 
 const router = express.Router();
 
@@ -135,6 +137,80 @@ router.get('/logs', async (req, res) => {
   } catch (error) {
     console.error('Error fetching logs:', error);
     res.status(500).json({ error: 'Failed to fetch logs' });
+  }
+});
+
+// POST /admin/init-db - Initialize database with schema and seed data
+router.post('/init-db', async (req, res) => {
+  try {
+    console.log('🔧 Starting database initialization...');
+
+    // Read the init.sql file
+    const initSqlPath = path.join(__dirname, '../../../database/init.sql');
+    
+    if (!fs.existsSync(initSqlPath)) {
+      return res.status(500).json({
+        success: false,
+        error: 'init.sql file not found',
+        path: initSqlPath
+      });
+    }
+
+    const initSql = fs.readFileSync(initSqlPath, 'utf8');
+
+    // Execute the SQL
+    await db.query(initSql);
+
+    console.log('✅ Database initialized successfully');
+
+    // Verify data was created
+    const publisherCount = await db.query('SELECT COUNT(*) FROM publishers');
+    const policyCount = await db.query('SELECT COUNT(*) FROM policies');
+    const planCount = await db.query('SELECT COUNT(*) FROM plans');
+
+    res.json({
+      success: true,
+      message: 'Database initialized successfully',
+      data: {
+        publishers: parseInt(publisherCount.rows[0].count),
+        policies: parseInt(policyCount.rows[0].count),
+        plans: parseInt(planCount.rows[0].count)
+      }
+    });
+  } catch (error) {
+    console.error('❌ Database initialization failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      details: error.stack
+    });
+  }
+});
+
+// GET /admin/db-status - Check database status
+router.get('/db-status', async (req, res) => {
+  try {
+    const publisherCount = await db.query('SELECT COUNT(*) FROM publishers');
+    const policyCount = await db.query('SELECT COUNT(*) FROM policies');
+    const planCount = await db.query('SELECT COUNT(*) FROM plans');
+    const clientCount = await db.query('SELECT COUNT(*) FROM clients');
+
+    res.json({
+      success: true,
+      initialized: parseInt(publisherCount.rows[0].count) > 0,
+      counts: {
+        publishers: parseInt(publisherCount.rows[0].count),
+        policies: parseInt(policyCount.rows[0].count),
+        plans: parseInt(planCount.rows[0].count),
+        clients: parseInt(clientCount.rows[0].count)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      initialized: false
+    });
   }
 });
 
