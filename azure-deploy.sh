@@ -60,7 +60,7 @@ echo ""
 
 # Step 5: Download docker-compose.azure.yml
 echo "📝 Step 5: Downloading docker-compose configuration..."
-curl -sS -O https://raw.githubusercontent.com/paulandrewfarrow/MonetizePlus/main/docker-compose.azure.yml
+curl -sS -O https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/docker-compose.azure.yml
 echo "✅ Configuration downloaded"
 echo ""
 

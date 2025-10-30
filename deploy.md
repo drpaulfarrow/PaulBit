@@ -4,12 +4,12 @@
 
 ### Option 1: Bash (Azure Cloud Shell, Linux, macOS, Git Bash)
 ```bash
-curl -sS https://raw.githubusercontent.com/paulandrewfarrow/MonetizePlus/main/azure-deploy.sh | bash
+curl -sS https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/azure-deploy.sh | bash
 ```
 
 ### Option 2: PowerShell (Windows)
 ```powershell
-irm https://raw.githubusercontent.com/paulandrewfarrow/MonetizePlus/main/azure-deploy.ps1 | iex
+irm https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/azure-deploy.ps1 | iex
 ```
 
 This single command will:

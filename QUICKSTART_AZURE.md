@@ -6,17 +6,17 @@
 1. Open [Azure Cloud Shell](https://shell.azure.com)
 2. Run:
 ```bash
-curl -sS https://raw.githubusercontent.com/paulandrewfarrow/MonetizePlus/main/azure-deploy.sh | bash
+curl -sS https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/azure-deploy.sh | bash
 ```
 
 ### Option 2: PowerShell (Windows)
 ```powershell
-irm https://raw.githubusercontent.com/paulandrewfarrow/MonetizePlus/main/azure-deploy.ps1 | iex
+irm https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/azure-deploy.ps1 | iex
 ```
 
 ### Option 3: Local Bash
 ```bash
-curl -O https://raw.githubusercontent.com/paulandrewfarrow/MonetizePlus/main/azure-deploy.sh
+curl -O https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/azure-deploy.sh
 chmod +x azure-deploy.sh
 ./azure-deploy.sh
 ```
