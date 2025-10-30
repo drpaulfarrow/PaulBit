@@ -1,6 +1,32 @@
 # Azure App Service Multi-Container Deployment (Using Docker Hub)
 
-## Step 1: Generate a secure JWT secret
+## 🚀 Quick Deploy (One Command)
+
+### Option 1: Bash (Azure Cloud Shell, Linux, macOS, Git Bash)
+```bash
+curl -sS https://raw.githubusercontent.com/paulandrewfarrow/MonetizePlus/main/azure-deploy.sh | bash
+```
+
+### Option 2: PowerShell (Windows)
+```powershell
+irm https://raw.githubusercontent.com/paulandrewfarrow/MonetizePlus/main/azure-deploy.ps1 | iex
+```
+
+This single command will:
+- ✅ Generate a secure JWT secret
+- ✅ Create Azure resource group and App Service plan (if needed)
+- ✅ Deploy all containers from Docker Hub
+- ✅ Configure environment variables
+- ✅ Initialize the database with publishers and policies
+- ✅ Verify deployment and show you the app URL
+
+---
+
+## 📖 Manual Deployment Steps
+
+If you prefer to deploy manually or customize the deployment:
+
+### Step 1: Generate a secure JWT secret
 ```bash
 JWT_SECRET=$(openssl rand -base64 32)
 echo "Generated JWT_SECRET (save this securely): $JWT_SECRET"
