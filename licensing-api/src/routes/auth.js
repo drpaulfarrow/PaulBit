@@ -6,6 +6,19 @@ const redis = require('../redis');
 
 const router = express.Router();
 
+// GET /auth/publishers - List all publishers (for login dropdown)
+router.get('/publishers', async (req, res) => {
+  try {
+    const result = await db.query(
+      'SELECT id, name, hostname FROM publishers ORDER BY id ASC'
+    );
+    res.json({ publishers: result.rows });
+  } catch (error) {
+    console.error('Error fetching publishers:', error);
+    res.status(500).json({ error: 'Failed to fetch publishers' });
+  }
+});
+
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const JWT_ISSUER = process.env.JWT_ISSUER || 'gatehouse-licensing';
 const JWT_AUDIENCE = process.env.JWT_AUDIENCE || 'gatehouse-edge';
