@@ -48,6 +48,24 @@ az webapp log tail \
   --resource-group MonetizePlusRG
 ```
 
+## Step 7: Initialize the database
+Once your app is deployed and running, initialize the database with publishers and policies:
+
+```bash
+# Get your app URL
+APP_URL=$(az webapp show --name monetizeplusapp --resource-group MonetizePlusRG --query defaultHostName -o tsv)
+
+# Initialize the database
+curl -X POST "https://${APP_URL}/admin/init-db"
+
+# Check database status
+curl "https://${APP_URL}/admin/db-status"
+```
+
+Or visit these URLs directly in your browser:
+- Initialize: `https://monetizeplusapp.azurewebsites.net/admin/init-db` (POST request)
+- Check status: `https://monetizeplusapp.azurewebsites.net/admin/db-status`
+
 ## One-Command Deployment
 ```bash
 JWT_SECRET=$(openssl rand -base64 32) && \
@@ -70,5 +88,9 @@ az webapp config appsettings set \
 az webapp restart \
   --name monetizeplusapp \
   --resource-group MonetizePlusRG && \
-echo "Deployment complete! JWT_SECRET: $JWT_SECRET"
+echo "Deployment complete! JWT_SECRET: $JWT_SECRET" && \
+echo "" && \
+echo "🔧 Next step: Initialize your database" && \
+echo "Visit: https://monetizeplusapp.azurewebsites.net/admin/init-db (POST request)" && \
+echo "Or run: curl -X POST https://monetizeplusapp.azurewebsites.net/admin/init-db"
 ```
