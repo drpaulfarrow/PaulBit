@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./db');
 const redis = require('./redis');
+const { runMigrations } = require('./migrate');
 const authRoutes = require('./routes/auth');
 const policyRoutes = require('./routes/policies');
 const usageRoutes = require('./routes/usage');
@@ -65,6 +66,9 @@ async function start() {
   try {
     await db.initialize();
     console.log('Database initialized');
+    
+    // Run migrations before starting the server
+    await runMigrations();
     
     await redis.initialize();
     console.log('Redis initialized');
