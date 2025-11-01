@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_NEGOTIATION_API_URL || 'http://localhost:3003';
+const SOCKET_URL = import.meta.env.VITE_NEGOTIATION_API_URL || null; // Disabled: no WebSocket service running
 
 export function useNegotiationSocket(publisherId) {
   const socketRef = useRef(null);
@@ -9,7 +9,8 @@ export function useNegotiationSocket(publisherId) {
   const [lastEvent, setLastEvent] = useState(null);
 
   useEffect(() => {
-    if (!publisherId) return;
+    // WebSocket disabled - no negotiation-agent service available
+    if (!publisherId || !SOCKET_URL) return;
 
     // Initialize socket connection
     socketRef.current = io(SOCKET_URL, {

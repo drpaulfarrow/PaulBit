@@ -11,8 +11,8 @@ export default function UsageLogs({ publisherId }) {
 
   const loadLogs = async () => {
     try {
-  const response = await axios.get(`/usage?publisherId=${publisherId}&limit=50`);
-      setLogs(response.data.events || []);
+      const response = await axios.get(`/api/logs?publisher_id=${publisherId}&limit=50`);
+      setLogs(response.data.logs || []);
     } catch (error) {
       console.error('Failed to load logs:', error);
     } finally {

@@ -3,8 +3,19 @@
 @tailwind utilities;
 
 /* ========================================
-   MONETIZEPLUS DESIGN SYSTEM
+   MAI DESIGN SYSTEM
    ======================================== */
+
+:root {
+  --mai-neutral: #F5F0E6;
+  --mai-yellow: #FFD84D;
+  --mai-orange: #FF8A3D;
+  --mai-purple: #9B59B6;
+  --mai-green: #27AE60;
+  --mai-blue: #4A90E2;
+  --font-primary: 'Bradford', serif;
+  --font-secondary: 'Segoe UI', sans-serif;
+}
 
 @layer base {
   html,
@@ -15,17 +26,21 @@
   }
 
   html {
-    background: #fff !important;
+    background: var(--mai-neutral) !important;
   }
 
   body {
-    font-family: system-ui, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--font-secondary), system-ui, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 12px;
     line-height: 1.5;
-    background-color: #f9f8f7;
+    background-color: var(--mai-neutral);
     color: #211f1f;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+  
+  .font-primary {
+    font-family: var(--font-primary);
   }
 
   h1 {
@@ -105,19 +120,19 @@
 
   /* Primary Button */
   .btn-primary {
-    background-color: #2abbb0 !important;
-    border-color: #2abbb0 !important;
+    background-color: var(--mai-blue) !important;
+    border-color: var(--mai-blue) !important;
     color: #fff !important;
   }
 
   .btn-primary:hover {
-    background-color: #2abbb0 !important;
+    background-color: var(--mai-blue) !important;
     opacity: 0.8;
   }
 
   .btn-primary:active {
-    background-color: #229e94 !important;
-    opacity: 1;
+    background-color: var(--mai-blue) !important;
+    opacity: 0.9;
   }
 
   .btn-primary:disabled {
@@ -142,13 +157,13 @@
 
   /* Success Button */
   .btn-success {
-    background-color: #49b27b !important;
-    border-color: #49b27b !important;
+    background-color: var(--mai-green) !important;
+    border-color: var(--mai-green) !important;
     color: #fff !important;
   }
 
   .btn-success:hover {
-    background-color: #49b27b !important;
+    background-color: var(--mai-green) !important;
     opacity: 0.8;
   }
 
@@ -206,8 +221,8 @@
   }
 
   .alert-warning {
-    background-color: #fffccd;
-    border: 1px solid #e5de7d;
+    background-color: color-mix(in srgb, var(--mai-yellow) 30%, white);
+    border: 1px solid var(--mai-orange);
     color: #333;
   }
 
@@ -218,14 +233,14 @@
   }
 
   .alert-success {
-    background-color: #e8f5ee;
-    border: 1px solid #49b27b;
+    background-color: color-mix(in srgb, var(--mai-green) 20%, white);
+    border: 1px solid var(--mai-green);
     color: #333;
   }
 
   .alert-info {
-    background-color: #e8f2fb;
-    border: 1px solid #587eba;
+    background-color: color-mix(in srgb, var(--mai-blue) 15%, white);
+    border: 1px solid var(--mai-blue);
     color: #333;
   }
 
@@ -244,13 +259,13 @@
   }
 
   .badge-success {
-    background-color: #e8f5ee;
-    color: #49b27b;
+    background-color: color-mix(in srgb, var(--mai-green) 20%, white);
+    color: var(--mai-green);
   }
 
   .badge-warning {
-    background-color: #fffccd;
-    color: #9d8c00;
+    background-color: color-mix(in srgb, var(--mai-yellow) 40%, white);
+    color: var(--mai-orange);
   }
 
   .badge-error {
@@ -259,8 +274,8 @@
   }
 
   .badge-info {
-    background-color: #e8f2fb;
-    color: #587eba;
+    background-color: color-mix(in srgb, var(--mai-blue) 20%, white);
+    color: var(--mai-blue);
   }
 
   /* ========================================
@@ -282,8 +297,8 @@
   input[type="number"]:focus:not(.unstyled),
   select:focus:not(.unstyled),
   textarea:focus:not(.unstyled) {
-    border-color: #2abbb0 !important;
-    box-shadow: 0 0 5px rgba(42, 187, 176, 0.2) !important;
+    border-color: var(--mai-blue) !important;
+    box-shadow: 0 0 5px color-mix(in srgb, var(--mai-blue) 30%, transparent) !important;
     outline: none;
   }
 }

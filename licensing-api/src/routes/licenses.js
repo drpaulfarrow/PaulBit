@@ -3,6 +3,40 @@ const LicenseOption = require('../models/LicenseOption');
 const router = express.Router();
 
 /**
+ * GET /api/licenses/stats
+ * Get license statistics for a publisher
+ */
+router.get('/stats', async (req, res) => {
+  try {
+    const { publisher_id } = req.query;
+    
+    if (!publisher_id) {
+      return res.status(400).json({ error: 'publisher_id is required' });
+    }
+
+    const db = require('../db');
+    const result = await db.query(
+      `SELECT 
+        COUNT(*) as total_licenses,
+        COUNT(CASE WHEN status = 'active' THEN 1 END) as active_licenses,
+        COUNT(DISTINCT content_id) as licensed_content_count
+       FROM license_options
+       WHERE publisher_id = $1`,
+      [publisher_id]
+    );
+
+    res.json({
+      total_licenses: parseInt(result.rows[0].total_licenses) || 0,
+      active_licenses: parseInt(result.rows[0].active_licenses) || 0,
+      licensed_content_count: parseInt(result.rows[0].licensed_content_count) || 0
+    });
+  } catch (error) {
+    console.error('Error fetching license stats:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
  * GET /api/licenses/meta/types
  * Get all license type definitions
  */
@@ -54,10 +88,12 @@ router.get('/meta/types', async (req, res) => {
  */
 router.get('/', async (req, res) => {
   try {
-    const { publisherId, contentId, license_type, status, limit } = req.query;
+    const { publisherId, publisher_id, contentId, license_type, status, limit } = req.query;
     
-    if (!publisherId) {
-      return res.status(400).json({ error: 'publisherId query parameter is required' });
+    const pubId = publisherId || publisher_id;
+    
+    if (!pubId) {
+      return res.status(400).json({ error: 'publisherId or publisher_id query parameter is required' });
     }
     
     const filters = {};
@@ -66,7 +102,7 @@ router.get('/', async (req, res) => {
     if (status) filters.status = status;
     if (limit) filters.limit = parseInt(limit);
     
-    const licenses = await LicenseOption.findByPublisher(parseInt(publisherId), filters);
+    const licenses = await LicenseOption.findByPublisher(parseInt(pubId), filters);
     
     res.json({ success: true, licenses });
   } catch (error) {

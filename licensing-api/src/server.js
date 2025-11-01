@@ -19,6 +19,13 @@ const accessRoutes = require('./routes/access');
 const auditRoutes = require('./routes/audit');
 const wellKnownRoutes = require('./routes/well-known');
 
+// Dashboard API routes
+const publishersRoutes = require('./routes/publishers');
+const urlsRoutes = require('./routes/urls');
+const negotiationsRoutes = require('./routes/negotiations');
+const logsRoutes = require('./routes/logs');
+const scraperRoutes = require('./routes/scraper');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -49,6 +56,13 @@ app.use('/api/access', accessRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/.well-known', wellKnownRoutes);
+
+// Dashboard API routes
+app.use('/api/publishers', publishersRoutes);
+app.use('/api/urls', urlsRoutes);
+app.use('/api/negotiations', negotiationsRoutes);
+app.use('/api/logs', logsRoutes);
+app.use('/api/scraper', scraperRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

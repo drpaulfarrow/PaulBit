@@ -103,14 +103,15 @@ function UrlLibrary() {
       setError(null);
       
       const params = new URLSearchParams();
+      params.append('publisher_id', '1');
       if (searchTerm) params.append('search', searchTerm);
       if (sortBy) params.append('sortBy', sortBy);
       if (selectedDomain) params.append('domain', selectedDomain);
       
-      const response = await fetch(`${API_URL}/parsed-urls?${params}`);
+      const response = await fetch(`${API_URL}/api/urls?${params}`);
       const data = await response.json();
       
-      if (data.success) {
+      if (data.urls) {
         setUrls(data.urls);
       } else {
         setError(data.error || 'Failed to fetch URLs');
@@ -906,7 +907,7 @@ function UrlLibrary() {
                       )}
                     </td>
                     <td className="px-3 py-3 text-sm text-gray-500">
-                      {url.domain}
+                      {url.domain || new URL(url.url).hostname}
                     </td>
                     <td className="px-3 py-3">
                       <button
@@ -923,7 +924,7 @@ function UrlLibrary() {
                       </button>
                     </td>
                     <td className="px-3 py-3 text-xs text-gray-500 whitespace-nowrap">
-                      {formatDate(url.last_parsed_at)}
+                      {url.updated_at ? formatDate(url.updated_at) : 'N/A'}
                     </td>
                     <td className="px-3 py-3 text-sm">
                       <div className="flex gap-1">

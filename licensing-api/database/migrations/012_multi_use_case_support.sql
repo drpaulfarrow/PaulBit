@@ -30,11 +30,15 @@ COMMENT ON COLUMN partner_negotiation_strategies.use_case IS 'Array of use cases
 ALTER TABLE license_options
 DROP CONSTRAINT IF EXISTS license_options_purpose_check;
 
--- First convert the column type
+-- Drop the default before converting type
+ALTER TABLE license_options
+ALTER COLUMN purpose DROP DEFAULT;
+
+-- Convert the column type
 ALTER TABLE license_options 
 ALTER COLUMN purpose TYPE TEXT[] USING ARRAY[purpose]::TEXT[];
 
--- Then set the default
+-- Now set the new array default
 ALTER TABLE license_options
 ALTER COLUMN purpose SET DEFAULT ARRAY['inference']::TEXT[];
 

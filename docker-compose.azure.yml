@@ -20,7 +20,10 @@ services:
 
   # Licensing API - authentication, tokens, metering, policies
   licensing-api:
-    image: paulandrewfarrow/monetizeplus-licensing-api:20251030-121415
+    build:
+      context: ./licensing-api
+      dockerfile: Dockerfile
+    image: paulandrewfarrow/monetizeplus-licensing-api:latest
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,7 +50,12 @@ services:
 
   # Publisher Dashboard
   publisher-dashboard:
-    image: paulandrewfarrow/monetizeplus-publisher-dashboard:20251030-113911
+    build:
+      context: ./publisher-dashboard
+      dockerfile: Dockerfile
+      args:
+        NGINX_CONFIG: nginx.azure.conf
+    image: paulandrewfarrow/monetizeplus-publisher-dashboard:azure
     depends_on:
       - licensing-api
       - urlparser

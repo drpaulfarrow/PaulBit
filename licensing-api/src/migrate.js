@@ -23,11 +23,33 @@ async function runMigrations() {
     const applied = await db.query('SELECT migration_name FROM schema_migrations ORDER BY id');
     const appliedMigrations = new Set(applied.rows.map(r => r.migration_name));
     
+    // Run init.sql first if it hasn't been applied
+    if (!appliedMigrations.has('000_init.sql')) {
+      const initPath = path.join(__dirname, '..', 'database', 'init.sql');
+      if (fs.existsSync(initPath)) {
+        console.log('   📄 Running initial schema: 000_init.sql');
+        try {
+          const sql = fs.readFileSync(initPath, 'utf8');
+          await db.query('BEGIN');
+          await db.query(sql);
+          await db.query('INSERT INTO schema_migrations (migration_name) VALUES ($1)', ['000_init.sql']);
+          await db.query('COMMIT');
+          console.log('   ✅ Applied: 000_init.sql');
+          appliedMigrations.add('000_init.sql');
+        } catch (error) {
+          await db.query('ROLLBACK');
+          console.error('❌ Failed to apply 000_init.sql:', error.message);
+          throw error;
+        }
+      }
+    }
+    
     // Get list of migration files
-    const migrationsDir = path.join(__dirname, '../..', 'database', 'migrations');
+    const migrationsDir = path.join(__dirname, '..', 'database', 'migrations');
     
     if (!fs.existsSync(migrationsDir)) {
       console.log('⚠️  Migrations directory not found, skipping migrations');
+      console.log('   Looking in:', migrationsDir);
       return;
     }
     

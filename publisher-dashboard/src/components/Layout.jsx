@@ -14,6 +14,7 @@ import {
   SparklesIcon,
   BellIcon
 } from '@heroicons/react/24/outline';
+import maiLogo from '../mai-logo.png';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -53,22 +54,17 @@ export default function Layout({ children, publisherId, onLogout }) {
       <header className="bg-white shadow">
         <div className="px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center gap-3">
-              <svg width="48" height="48" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M47.3348 47.6391H32V32.4306H47.3348V47.6391Z" fill="#F25022"/>
-                <path d="M64.2655 47.6391H48.9307V32.4306H64.2655V47.6391Z" fill="#7FBA00"/>
-                <path d="M47.3348 64.4306H32V49.2218H47.3348V64.4306Z" fill="#00A4EF"/>
-                <path d="M64.2655 64.4306H48.9307V49.2218H64.2655V64.4306Z" fill="#FFB900"/>
-              </svg>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Microsoft Monetize<sup className="text-sm ml-1">Plus</sup>
+            <Link to="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <img src={maiLogo} alt="MAI Logo" className="h-8" />
+              <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Segoe UI, sans-serif' }}>
+                Monetize
               </h1>
-            </div>
+            </Link>
             <span className="text-sm text-gray-500">Publisher #{publisherId}</span>
           </div>
           <button
             onClick={onLogout}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors shadow-sm"
           >
             <ArrowRightOnRectangleIcon className="w-4 h-4" />
             Logout

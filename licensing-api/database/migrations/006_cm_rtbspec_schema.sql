@@ -108,19 +108,7 @@ CREATE INDEX IF NOT EXISTS idx_access_license ON access_endpoints(license_id);
 CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_trail(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_audit_ts ON audit_trail(ts);
 
--- Grant permissions
-GRANT ALL PRIVILEGES ON TABLE content TO tollbit;
-GRANT ALL PRIVILEGES ON TABLE license_options TO tollbit;
-GRANT ALL PRIVILEGES ON TABLE access_endpoints TO tollbit;
-GRANT ALL PRIVILEGES ON TABLE audit_trail TO tollbit;
-GRANT ALL PRIVILEGES ON TABLE attribution_events TO tollbit;
-GRANT ALL PRIVILEGES ON TABLE methodology_docs TO tollbit;
-
-GRANT USAGE, SELECT ON SEQUENCE content_id_seq TO tollbit;
-GRANT USAGE, SELECT ON SEQUENCE license_options_id_seq TO tollbit;
-GRANT USAGE, SELECT ON SEQUENCE access_endpoints_id_seq TO tollbit;
-GRANT USAGE, SELECT ON SEQUENCE audit_trail_id_seq TO tollbit;
-GRANT USAGE, SELECT ON SEQUENCE methodology_docs_id_seq TO tollbit;
+-- Grant permissions (removed - using default monetizeplus user)
 
 -- Migrate existing data from parsed_urls to content
 INSERT INTO content (

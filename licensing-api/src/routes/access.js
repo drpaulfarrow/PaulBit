@@ -44,17 +44,19 @@ router.get('/meta/types', async (req, res) => {
 });
 
 /**
- * GET /api/access?publisherId=X
+ * GET /api/access?publisherId=X or publisher_id=X
  * Get all access endpoints for a publisher
  */
 router.get('/', async (req, res) => {
   try {
-    const { publisherId } = req.query;
+    const { publisherId, publisher_id } = req.query;
     
-    if (!publisherId) {
+    const pubId = publisherId || publisher_id;
+    
+    if (!pubId) {
       return res.status(400).json({ 
         success: false, 
-        error: 'publisherId parameter required' 
+        error: 'publisherId or publisher_id parameter required' 
       });
     }
     
@@ -64,11 +66,46 @@ router.get('/', async (req, res) => {
       FROM access_endpoints
       WHERE publisher_id = $1
       ORDER BY id DESC
-    `, [publisherId]);
+    `, [pubId]);
     
-    res.json({ success: true, endpoints: result.rows });
+    res.json({ success: true, rules: result.rows, endpoints: result.rows });
   } catch (error) {
     console.error('Error fetching access endpoints:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/access/default-policy
+ * Get the default access policy for a publisher
+ */
+router.get('/default-policy', async (req, res) => {
+  try {
+    const { publisher_id } = req.query;
+    
+    if (!publisher_id) {
+      return res.status(400).json({ error: 'publisher_id is required' });
+    }
+
+    const db = require('../db');
+    const result = await db.query(
+      `SELECT policy_json FROM policies 
+       WHERE publisher_id = $1 
+       ORDER BY created_at DESC 
+       LIMIT 1`,
+      [publisher_id]
+    );
+
+    const defaultPolicy = result.rows.length > 0 
+      ? result.rows[0].policy_json 
+      : { default: { allow: false }, rules: [] };
+
+    res.json({ 
+      success: true,
+      policy: defaultPolicy 
+    });
+  } catch (error) {
+    console.error('Error fetching default policy:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
