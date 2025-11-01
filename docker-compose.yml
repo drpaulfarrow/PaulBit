@@ -54,6 +54,24 @@ services:
     ports:
       - "3001:3001"
 
+  negotiation-agent:
+    build:
+      context: ./negotiation-agent
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - redis
+      - licensing-api
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      DATABASE_URL: postgres://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
+      REDIS_URL: redis://redis:6379
+      LICENSING_API_URL: http://licensing-api:3000
+    ports:
+      - "3003:3003"
+    restart: always
+
   publisher-dashboard:
     build:
       context: ./publisher-dashboard

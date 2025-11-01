@@ -64,8 +64,10 @@ export default function ActiveNegotiations() {
   async function loadNegotiations() {
     try {
       const statusFilter = filter === 'all' ? null : filter;
-      const data = await negotiationApi.getNegotiations(publisherId, statusFilter);
-      setNegotiations(data.negotiations || []);
+      const result = await negotiationApi.getNegotiations(publisherId, statusFilter);
+      // Handle both {negotiations: [...]} and direct array response
+      const negotiations = Array.isArray(result) ? result : (result.negotiations || []);
+      setNegotiations(negotiations);
     } catch (error) {
       console.error('Failed to load negotiations:', error);
     } finally {

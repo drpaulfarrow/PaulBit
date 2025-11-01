@@ -1,6 +1,18 @@
 // Negotiation Agent API Client
-const NEGOTIATION_API = import.meta.env.VITE_NEGOTIATION_API_URL || 'http://localhost:3003';
-const LICENSING_API = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// Use relative URLs when running in Docker (via nginx proxy), absolute URLs for dev
+// When VITE_API_URL is empty or not set, use relative URLs (empty string)
+const getApiBase = (envVar, defaultPort) => {
+  if (import.meta.env[envVar]) return import.meta.env[envVar];
+  // Check if running on localhost:5173 (dev server) - use absolute URL
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '5173') {
+    return `http://localhost:${defaultPort}`;
+  }
+  // Otherwise use relative URL (empty string) for Docker/production
+  return '';
+};
+
+const NEGOTIATION_API = getApiBase('VITE_NEGOTIATION_API_URL', 3003);
+const LICENSING_API = getApiBase('VITE_API_URL', 3000);
 
 export const negotiationApi = {
   // Strategies
@@ -50,7 +62,8 @@ export const negotiationApi = {
     );
     if (!res.ok) throw new Error('Failed to fetch negotiations');
     const data = await res.json();
-    return data.negotiations || [];
+    // API returns {negotiations: [...], count: N} - return the data object directly
+    return data.negotiations || data || [];
   },
 
   async getNegotiation(negotiationId) {
