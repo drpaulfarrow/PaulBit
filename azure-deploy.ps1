@@ -118,10 +118,29 @@ if ($INIT_RESPONSE -match '"success":true') {
 }
 Write-Host ""
 
-# Step 12: Check database status
-Write-Host "📝 Step 12: Checking database status..." -ForegroundColor Yellow
-$STATUS_RESPONSE = curl.exe -sS "https://$APP_URL/admin/db-status"
-Write-Host $STATUS_RESPONSE
+# Step 12: Populate database with sample data
+Write-Host "📝 Step 12: Populating database with sample data..." -ForegroundColor Yellow
+Write-Host "   This will populate all UI sections with test data..." -ForegroundColor Gray
+try {
+    $POPULATE_RESPONSE = Invoke-RestMethod -Uri "https://$APP_URL/admin/populate-sample-data" -Method POST -ErrorAction Stop
+    if ($POPULATE_RESPONSE.success) {
+        Write-Host "✅ Sample data populated successfully" -ForegroundColor Green
+        Write-Host "   • Negotiations: $($POPULATE_RESPONSE.counts.negotiations)" -ForegroundColor Gray
+        Write-Host "   • Notifications: $($POPULATE_RESPONSE.counts.notifications)" -ForegroundColor Gray
+        Write-Host "   • Usage Events: $($POPULATE_RESPONSE.counts.usage_events)" -ForegroundColor Gray
+        Write-Host "   • Access Endpoints: $($POPULATE_RESPONSE.counts.access_endpoints)" -ForegroundColor Gray
+        Write-Host "   • Strategies: $($POPULATE_RESPONSE.counts.strategies)" -ForegroundColor Gray
+        Write-Host "   • Parsed URLs: $($POPULATE_RESPONSE.counts.parsed_urls)" -ForegroundColor Gray
+        Write-Host "   • Content: $($POPULATE_RESPONSE.counts.content)" -ForegroundColor Gray
+        Write-Host "   • Licenses: $($POPULATE_RESPONSE.counts.licenses)" -ForegroundColor Gray
+    } else {
+        Write-Host "⚠️  Sample data population may have failed" -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "⚠️  Sample data population failed: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "   You can manually populate later with:" -ForegroundColor Gray
+    Write-Host "   curl.exe -X POST https://$APP_URL/admin/populate-sample-data" -ForegroundColor Gray
+}
 Write-Host ""
 
 # Summary
@@ -135,6 +154,10 @@ Write-Host "  • Dashboard: https://$APP_URL/"
 Write-Host "  • Admin Status: https://$APP_URL/admin/db-status"
 Write-Host "  • JWT Secret: $JWT_SECRET"
 Write-Host ""
+Write-Host "✅ Sample Data:" -ForegroundColor Green
+Write-Host "  • Database populated with test data for all UI sections"
+Write-Host "  • Includes negotiations, notifications, usage logs, and more"
+Write-Host ""
 Write-Host "🔐 Save your JWT secret securely!" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "📝 Next Steps:" -ForegroundColor White
@@ -142,7 +165,7 @@ Write-Host "  1. Visit https://$APP_URL/ to access the dashboard"
 Write-Host "  2. Login with one of the default publishers:"
 Write-Host "     - Publisher A News (site-a.local)"
 Write-Host "     - Publisher B Documentation (site-b.local)"
-Write-Host "  3. ClaudeBot is already enabled in the default policies"
+Write-Host "  3. All UI sections should now have sample data"
 Write-Host ""
 Write-Host "📊 View logs:" -ForegroundColor White
 Write-Host "  az webapp log tail --name $APP_NAME --resource-group $RESOURCE_GROUP"

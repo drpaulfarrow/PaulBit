@@ -166,6 +166,40 @@ else
 fi
 echo ""
 
+# Step 13: Populate database with sample data
+echo "📝 Step 13: Populating database with sample data..."
+echo "   This will populate all UI sections with test data..."
+POPULATE_RESPONSE=$(curl -sS -X POST "https://$APP_URL/admin/populate-sample-data" 2>/dev/null || echo "{}")
+POPULATE_SUCCESS=$(echo "$POPULATE_RESPONSE" | grep -o '"success":true' || echo "")
+
+if [ -n "$POPULATE_SUCCESS" ]; then
+    echo "✅ Sample data populated successfully"
+    # Extract and display counts
+    NEGOTIATIONS=$(echo "$POPULATE_RESPONSE" | grep -o '"negotiations":[0-9]*' | grep -o '[0-9]*' || echo "?")
+    NOTIFICATIONS=$(echo "$POPULATE_RESPONSE" | grep -o '"notifications":[0-9]*' | grep -o '[0-9]*' || echo "?")
+    USAGE=$(echo "$POPULATE_RESPONSE" | grep -o '"usage_events":[0-9]*' | grep -o '[0-9]*' || echo "?")
+    ACCESS=$(echo "$POPULATE_RESPONSE" | grep -o '"access_endpoints":[0-9]*' | grep -o '[0-9]*' || echo "?")
+    STRATEGIES=$(echo "$POPULATE_RESPONSE" | grep -o '"strategies":[0-9]*' | grep -o '[0-9]*' || echo "?")
+    URLS=$(echo "$POPULATE_RESPONSE" | grep -o '"parsed_urls":[0-9]*' | grep -o '[0-9]*' || echo "?")
+    CONTENT=$(echo "$POPULATE_RESPONSE" | grep -o '"content":[0-9]*' | grep -o '[0-9]*' || echo "?")
+    LICENSES=$(echo "$POPULATE_RESPONSE" | grep -o '"licenses":[0-9]*' | grep -o '[0-9]*' || echo "?")
+    
+    echo "   • Negotiations: $NEGOTIATIONS"
+    echo "   • Notifications: $NOTIFICATIONS"
+    echo "   • Usage Events: $USAGE"
+    echo "   • Access Endpoints: $ACCESS"
+    echo "   • Strategies: $STRATEGIES"
+    echo "   • Parsed URLs: $URLS"
+    echo "   • Content: $CONTENT"
+    echo "   • Licenses: $LICENSES"
+else
+    echo "⚠️  Sample data population may have failed"
+    echo "   Response: $POPULATE_RESPONSE"
+    echo "   You can manually populate later with:"
+    echo "   curl -X POST https://$APP_URL/admin/populate-sample-data"
+fi
+echo ""
+
 # Summary
 echo "========================================================"
 echo "🎉 Deployment Complete!"
@@ -182,6 +216,11 @@ echo "  • Migrations run on startup"
 echo "  • Tables created: license_options, access_endpoints, content"
 echo "  • Database schema is up to date"
 echo ""
+echo "✅ Sample Data:"
+echo "  • Database populated with test data for all UI sections"
+echo "  • Includes negotiations, notifications, usage logs, and more"
+echo ""
+
 echo "� Test Endpoints:"
 echo "  curl https://$APP_URL/api/licenses?publisherId=1"
 echo "  curl https://$APP_URL/api/access?publisherId=1"

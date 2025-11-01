@@ -8,6 +8,7 @@ import {
   ArrowPathIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
+import { LICENSING_API as API_URL } from '../utils/apiConfig';
 
 export default function PolicyTester() {
   const [urls, setUrls] = useState([]);
@@ -16,18 +17,6 @@ export default function PolicyTester() {
   const [testResults, setTestResults] = useState([]);
   const [testing, setTesting] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  // Use relative URLs when running in Docker (via nginx proxy), absolute URLs for dev
-  const getApiBase = (envVar, defaultPort) => {
-    if (import.meta.env[envVar]) return import.meta.env[envVar];
-    // Check if running on localhost:5173 (dev server) - use absolute URL
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '5173') {
-      return `http://localhost:${defaultPort}`;
-    }
-    // Otherwise use relative URL (empty string) for Docker/production
-    return '';
-  };
-  const API_URL = getApiBase('VITE_API_URL', 3000);
 
   const commonBots = [
     { id: 'GPTBot', name: 'GPTBot (OpenAI)', description: 'ChatGPT crawler' },
