@@ -124,9 +124,15 @@ router.get('/parsed-urls', async (req, res) => {
     // Enrich each URL with policy information
     const enrichedUrls = await Promise.all(result.rows.map(async (url) => {
       try {
-        // Extract domain from URL
-        const urlObj = new URL(url.url);
-        const hostname = urlObj.hostname;
+        // Extract domain from URL - handle invalid URLs gracefully
+        let hostname;
+        try {
+          const urlObj = new URL(url.url);
+          hostname = urlObj.hostname;
+        } catch (err) {
+          // If URL parsing fails, use domain from DB or skip enrichment
+          hostname = url.domain || 'unknown';
+        }
 
         // Check for page-specific policy (exact URL match)
         const pagePolicy = await db.query(

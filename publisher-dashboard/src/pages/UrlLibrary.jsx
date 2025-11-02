@@ -103,21 +103,43 @@ function UrlLibrary() {
       setError(null);
       
       const params = new URLSearchParams();
-      params.append('publisher_id', '1');
+      // Note: /parsed-urls doesn't use publisher_id - it returns all URLs
+      // The domain crawler adds to parsed_urls table, not content table
       if (searchTerm) params.append('search', searchTerm);
       if (sortBy) params.append('sortBy', sortBy);
-      if (selectedDomain) params.append('domain', selectedDomain);
+      if (selectedDomain && selectedDomain !== 'all') params.append('domain', selectedDomain);
+      params.append('limit', '100');
       
-      const response = await fetch(`${API_URL}/api/urls?${params}`);
+      const fetchUrl = `${API_URL}/parsed-urls?${params}`;
+      console.log('[UrlLibrary] Fetching URLs from:', fetchUrl);
+      
+      const response = await fetch(fetchUrl);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
       
-      if (data.urls) {
+      console.log('[UrlLibrary] Response:', { 
+        success: data.success, 
+        urlsCount: data.urls?.length, 
+        pagination: data.pagination,
+        firstUrl: data.urls?.[0]?.url 
+      });
+      
+      if (data.success && data.urls && Array.isArray(data.urls)) {
+        console.log('[UrlLibrary] Setting URLs:', data.urls.length);
         setUrls(data.urls);
       } else {
-        setError(data.error || 'Failed to fetch URLs');
+        console.error('[UrlLibrary] Invalid response format:', data);
+        setError(data.error || 'Failed to fetch URLs - invalid response format');
+        setUrls([]);
       }
     } catch (err) {
+      console.error('[UrlLibrary] Fetch error:', err);
       setError('Network error: ' + err.message);
+      setUrls([]);
     } finally {
       setLoading(false);
     }
@@ -139,6 +161,8 @@ function UrlLibrary() {
   useEffect(() => {
     fetchLicenses();
     fetchAccessEndpoints();
+    fetchUrls();
+    fetchStats();
   }, []);
 
   useEffect(() => {
@@ -924,7 +948,7 @@ function UrlLibrary() {
                       </button>
                     </td>
                     <td className="px-3 py-3 text-xs text-gray-500 whitespace-nowrap">
-                      {url.updated_at ? formatDate(url.updated_at) : 'N/A'}
+                      {url.last_parsed_at ? formatDate(url.last_parsed_at) : (url.created_at ? formatDate(url.created_at) : 'N/A')}
                     </td>
                     <td className="px-3 py-3 text-sm">
                       <div className="flex gap-1">
