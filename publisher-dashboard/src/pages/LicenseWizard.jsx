@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { LICENSING_API as API_URL } from '../utils/apiConfig';
 
 export default function LicenseManager({ publisherId }) {
   const [licenses, setLicenses] = useState([]);
@@ -28,8 +29,8 @@ export default function LicenseManager({ publisherId }) {
     setLoading(true);
     try {
       const [licensesRes, typesRes] = await Promise.all([
-        axios.get(`/api/licenses?publisherId=${publisherId}`),
-        axios.get('/api/licenses/meta/types')
+        axios.get(`${API_URL}/api/licenses?publisherId=${publisherId}`),
+        axios.get(`${API_URL}/api/licenses/meta/types`)
       ]);
       
       setLicenses(licensesRes.data.licenses || []);
@@ -83,7 +84,7 @@ export default function LicenseManager({ publisherId }) {
 
       if (editingLicense) {
         // Update existing license
-        const response = await axios.put(`/api/licenses/${editingLicense.id}`, payload, {
+        const response = await axios.put(`${API_URL}/api/licenses/${editingLicense.id}`, payload, {
           headers: { 'X-User-Id': '1' }
         });
         
@@ -96,7 +97,7 @@ export default function LicenseManager({ publisherId }) {
         }
       } else {
         // Create new license
-        const response = await axios.post('/api/licenses', payload, {
+        const response = await axios.post(`${API_URL}/api/licenses`, payload, {
           headers: { 'X-User-Id': '1' }
         });
         
@@ -133,7 +134,7 @@ export default function LicenseManager({ publisherId }) {
     if (!newContentId) return;
     
     try {
-      await axios.post(`/api/licenses/${licenseId}/clone`, {
+      await axios.post(`${API_URL}/api/licenses/${licenseId}/clone`, {
         content_id: parseInt(newContentId)
       }, {
         headers: { 'X-User-Id': '1' }
@@ -148,14 +149,34 @@ export default function LicenseManager({ publisherId }) {
   };
 
   const handleDelete = async (id) => {
+    // Find the license to check if it's the default parent license
+    const license = licenses.find(l => l.id === id);
+    
+    // Prevent deletion of default parent licenses
+    // Check for both null and undefined, and also check if content_id is explicitly null/undefined (parent license)
+    const isDefaultParent = license && 
+                            license.name === 'default' && 
+                            (license.content_id === null || license.content_id === undefined || license.content_id === '');
+    
+    if (isDefaultParent) {
+      alert('Cannot delete the default parent license. This is a system template license that cannot be removed.');
+      return;
+    }
+    
     if (!confirm('Delete this license? This will also delete all associated access endpoints.')) return;
     
     try {
-      await axios.delete(`/api/licenses/${id}?userId=1`);
+      await axios.delete(`${API_URL}/api/licenses/${id}?userId=1`);
       loadData();
     } catch (error) {
       console.error('Failed to delete license:', error);
-      alert(`Error: ${error.response?.data?.error || error.message}`);
+      // If the API also blocks deletion, show the API error message
+      const errorMsg = error.response?.data?.error || error.message;
+      if (errorMsg.includes('default parent license') || errorMsg.includes('system template')) {
+        alert('Cannot delete the default parent license. This is a system template license that cannot be removed.');
+      } else {
+        alert(`Error: ${errorMsg}`);
+      }
     }
   };
 
@@ -263,7 +284,7 @@ export default function LicenseManager({ publisherId }) {
                 <tr key={license.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-900">
-                      {license.name || `License #${license.id}`}
+                      {license.name === 'default' ? 'Default' : (license.name || `License #${license.id}`)}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -321,12 +342,15 @@ export default function LicenseManager({ publisherId }) {
                     >
                       Clone
                     </button>
-                    <button
-                      onClick={() => handleDelete(license.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      Delete
-                    </button>
+                    {/* Completely hide delete button for default parent licenses */}
+                    {!(license.name === 'default' && (license.content_id === null || license.content_id === undefined || license.content_id === '')) && (
+                      <button
+                        onClick={() => handleDelete(license.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

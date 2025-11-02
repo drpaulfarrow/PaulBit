@@ -464,9 +464,10 @@ function UrlLibrary() {
 
       setCsvResult(results);
       
-      // Refresh the URL list
+      // Refresh the URL list and stats
       if (results.successful > 0) {
         await fetchUrls();
+        await fetchStats(); // Also refresh stats to update Total URLs counter
       }
     } catch (err) {
       alert('Error processing CSV: ' + err.message);
@@ -988,11 +989,13 @@ function UrlLibrary() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">No License</option>
-                {licenses.map((license) => (
-                  <option key={license.id} value={license.id}>
-                    {getLicenseDisplayName(license)}
-                  </option>
-                ))}
+                {licenses
+                  .filter(license => license.content_id === null || license.content_id === undefined)
+                  .map((license) => (
+                    <option key={license.id} value={license.id}>
+                      {getLicenseDisplayName(license)}
+                    </option>
+                  ))}
               </select>
             </div>
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-
+# curl -sS https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/azure-deploy.sh | bash
 # MonetizePlus Azure Deployment Script with Automatic Migrations
 # This script deploys MonetizePlus to Azure App Service with database migration support
 

@@ -31,16 +31,31 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      url-parser:
+        condition: service_started
     environment:
       NODE_ENV: production
       PORT: 3000
       DATABASE_URL: postgres://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
       REDIS_URL: redis://redis:6379
+      URL_PARSER_URL: http://url-parser:4000
       JWT_SECRET: super-secret-change-in-production
       JWT_ISSUER: monetizeplus
       JWT_AUDIENCE: monetizeplus-edge
     ports:
       - "3000:3000"
+
+  url-parser:
+    build:
+      context: ./Simple Parser/url-to-markdown
+      dockerfile: Dockerfile
+    image: paulandrewfarrow/monetizeplus-url-parser:latest
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    restart: always
 
   edge-worker:
     image: paulandrewfarrow/monetizeplus-edge-worker:latest

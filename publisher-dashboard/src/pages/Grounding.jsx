@@ -10,6 +10,7 @@ import {
   ServerIcon,
   KeyIcon
 } from '@heroicons/react/24/outline';
+import { LICENSING_API as API_URL } from '../utils/apiConfig';
 
 export default function Grounding() {
   const [url, setUrl] = useState('');
@@ -54,7 +55,7 @@ export default function Grounding() {
     const startTime = Date.now();
 
     try {
-      const response = await axios.post('/api/grounding', {
+      const response = await axios.post(`${API_URL}/api/grounding`, {
         url,
         userAgent: `${botName}/1.0`,
         clientId: botName.toLowerCase(),

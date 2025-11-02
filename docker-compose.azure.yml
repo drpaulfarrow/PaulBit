@@ -27,10 +27,13 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      urlparser:
+        condition: service_started
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
       REDIS_ENABLED: "false"
+      URL_PARSER_URL: http://urlparser:4000
       JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: monetizeplus
       JWT_AUDIENCE: monetizeplus-edge

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { LICENSING_API as API_URL } from '../utils/apiConfig';
 
 export default function AccessConfiguration({ publisherId }) {
   const [endpoints, setEndpoints] = useState([]);
@@ -34,8 +35,8 @@ export default function AccessConfiguration({ publisherId }) {
     setLoading(true);
     try {
       const [endpointsRes, typesRes] = await Promise.all([
-        axios.get(`/api/access?publisherId=${publisherId}`),
-        axios.get('/api/access/meta/types')
+        axios.get(`${API_URL}/api/access?publisherId=${publisherId}`),
+        axios.get(`${API_URL}/api/access/meta/types`)
       ]);
       
       setEndpoints(endpointsRes.data.endpoints || []);
@@ -85,7 +86,7 @@ export default function AccessConfiguration({ publisherId }) {
       
       if (formData.rate_limit) payload.rate_limit = parseInt(formData.rate_limit);
       
-      await axios.post('/api/access', payload, {
+      await axios.post(`${API_URL}/api/access`, payload, {
         headers: { 'X-User-Id': '1' }
       });
       
@@ -135,7 +136,7 @@ export default function AccessConfiguration({ publisherId }) {
       
       if (formData.rate_limit) payload.rate_limit = parseInt(formData.rate_limit);
       
-      await axios.put(`/api/access/${editingEndpoint.id}`, payload, {
+      await axios.put(`${API_URL}/api/access/${editingEndpoint.id}`, payload, {
         headers: { 'X-User-Id': '1' }
       });
       
@@ -153,7 +154,7 @@ export default function AccessConfiguration({ publisherId }) {
     setTestResults({ ...testResults, [id]: { testing: true } });
     
     try {
-      const response = await axios.post(`/api/access/${id}/test`);
+      const response = await axios.post(`${API_URL}/api/access/${id}/test`);
       setTestResults({ 
         ...testResults, 
         [id]: { 
@@ -178,7 +179,7 @@ export default function AccessConfiguration({ publisherId }) {
     if (!confirm('Delete this access endpoint?')) return;
     
     try {
-      await axios.delete(`/api/access/${id}?userId=1`);
+      await axios.delete(`${API_URL}/api/access/${id}?userId=1`);
       loadData();
     } catch (error) {
       console.error('Failed to delete endpoint:', error);

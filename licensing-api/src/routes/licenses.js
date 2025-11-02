@@ -250,6 +250,17 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.query.userId || req.headers['x-user-id'];
+    
+    // Check if this is the default license before attempting deletion
+    const license = await LicenseOption.findById(parseInt(id));
+    if (license && license.name === 'default' && (license.content_id === null || license.content_id === undefined)) {
+      console.log(`[DELETE /api/licenses/:id] Blocked deletion of default parent license ID ${id}`);
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Cannot delete the default parent license. This is a system template license.' 
+      });
+    }
+    
     await LicenseOption.delete(parseInt(id), userId);
     
     res.json({ success: true, message: 'License deleted' });

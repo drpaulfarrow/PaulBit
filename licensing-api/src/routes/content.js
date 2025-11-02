@@ -201,7 +201,7 @@ router.post('/from-url', async (req, res) => {
     if (licenseId) {
       const LicenseOption = require('../models/LicenseOption');
       
-      // Get the license to check its type
+      // Get the license to check its type and whether it's a parent license
       const licenseData = await db.query(
         'SELECT * FROM license_options WHERE id = $1 AND publisher_id = $2',
         [licenseId, publisherId]
@@ -211,13 +211,106 @@ router.post('/from-url', async (req, res) => {
         return res.status(404).json({ error: 'License not found' });
       }
       
-      // Update the license to link it to this content
-      await db.query(
-        'UPDATE license_options SET content_id = $1, updated_ts = NOW() WHERE id = $2',
-        [contentId, licenseId]
+      const originalLicense = licenseData.rows[0];
+      
+      // Check if this content already has a license of this type
+      const existingLicense = await db.query(
+        'SELECT * FROM license_options WHERE content_id = $1 AND license_type = $2',
+        [contentId, originalLicense.license_type]
       );
       
-      license = licenseData.rows[0];
+      if (existingLicense.rows.length > 0) {
+        // Content already has a license of this type - update it instead of creating duplicate
+        const updated = await db.query(
+          `UPDATE license_options 
+           SET license_id = $1, price = $2, currency = $3, term_months = $4, 
+               revshare_pct = $5, max_word_count = $6, attribution_required = $7,
+               attribution_text = $8, attribution_url = $9, derivative_allowed = $10,
+               name = $11, updated_ts = NOW()
+           WHERE id = $12
+           RETURNING *`,
+          [
+            originalLicense.license_id ? `${originalLicense.license_id}_${contentId}` : `license_${contentId}_${originalLicense.license_type}`,
+            originalLicense.price,
+            originalLicense.currency,
+            originalLicense.term_months,
+            originalLicense.revshare_pct,
+            originalLicense.max_word_count,
+            originalLicense.attribution_required,
+            originalLicense.attribution_text,
+            originalLicense.attribution_url,
+            originalLicense.derivative_allowed,
+            originalLicense.name,
+            existingLicense.rows[0].id
+          ]
+        );
+        license = updated.rows[0];
+      } else {
+        // Need to create/clone a license for this content
+        // Use INSERT ... ON CONFLICT to handle race conditions
+        const userId = req.body.userId || req.headers['x-user-id'];
+        
+        // Generate unique license_id
+        const newLicenseId = originalLicense.license_id 
+          ? `${originalLicense.license_id}_${contentId}_${Date.now()}`
+          : `license_${contentId}_${originalLicense.license_type}_${Date.now()}`;
+        
+        // Use upsert pattern to handle the unique constraint on (content_id, license_type)
+        const upsertResult = await db.query(`
+          INSERT INTO license_options (
+            license_id, content_id, publisher_id, license_type, price, currency,
+            term_months, revshare_pct, max_word_count, attribution_required,
+            attribution_text, attribution_url, derivative_allowed, name, status, ext
+          )
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+          ON CONFLICT ON CONSTRAINT license_options_content_id_license_type_key 
+          DO UPDATE SET
+            license_id = EXCLUDED.license_id,
+            price = EXCLUDED.price,
+            currency = EXCLUDED.currency,
+            term_months = EXCLUDED.term_months,
+            revshare_pct = EXCLUDED.revshare_pct,
+            max_word_count = EXCLUDED.max_word_count,
+            attribution_required = EXCLUDED.attribution_required,
+            attribution_text = EXCLUDED.attribution_text,
+            attribution_url = EXCLUDED.attribution_url,
+            derivative_allowed = EXCLUDED.derivative_allowed,
+            name = EXCLUDED.name,
+            updated_ts = NOW()
+          RETURNING *
+        `, [
+          newLicenseId,
+          contentId,
+          publisherId,
+          originalLicense.license_type,
+          originalLicense.price,
+          originalLicense.currency,
+          originalLicense.term_months,
+          originalLicense.revshare_pct,
+          originalLicense.max_word_count,
+          originalLicense.attribution_required,
+          originalLicense.attribution_text,
+          originalLicense.attribution_url,
+          originalLicense.derivative_allowed,
+          originalLicense.name,
+          originalLicense.status || 'active',
+          JSON.stringify(originalLicense.ext || {})
+        ]);
+        
+        license = upsertResult.rows[0];
+        
+        // Log audit if it was an insert (id matches expected new id pattern)
+        // Note: We can't easily distinguish insert vs update with ON CONFLICT,
+        // so we'll log as create for now
+        const { logAudit } = require('../utils/audit');
+        await logAudit({
+          entity_type: 'license_option',
+          entity_id: license.id,
+          action: 'create',
+          user_id: userId,
+          new_values: license
+        });
+      }
     }
     
     res.status(201).json({ 

@@ -198,11 +198,22 @@ class LicenseOption {
   
   /**
    * Delete license
+   * Prevents deletion of default parent licenses (name='default' AND content_id IS NULL)
    */
   static async delete(id, userId) {
     const license = await this.findById(id);
     if (!license) {
       throw new Error('License not found');
+    }
+    
+    // Prevent deletion of default parent licenses
+    // Check name='default' and content_id is null/undefined (parent license)
+    const isDefaultParent = license.name === 'default' && 
+                            (license.content_id === null || license.content_id === undefined);
+    
+    if (isDefaultParent) {
+      console.log(`[LicenseOption.delete] Blocked deletion of default parent license ID ${id}`);
+      throw new Error('Cannot delete the default parent license. This is a system template license.');
     }
     
     await db.query('DELETE FROM license_options WHERE id = $1', [id]);
