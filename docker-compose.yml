@@ -1,12 +1,10 @@
-version: "3.8"
-
 services:
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_USER: monetizeplus
-      POSTGRES_PASSWORD: monetizeplus123
-      POSTGRES_DB: monetizeplus
+      POSTGRES_USER: ${POSTGRES_USER:-monetizeplus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-monetizeplus123}
+      POSTGRES_DB: ${POSTGRES_DB:-monetizeplus}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -34,16 +32,22 @@ services:
       url-parser:
         condition: service_started
     environment:
-      NODE_ENV: production
-      PORT: 3000
-      DATABASE_URL: postgres://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
-      REDIS_URL: redis://redis:6379
-      URL_PARSER_URL: http://url-parser:4000
-      JWT_SECRET: super-secret-change-in-production
-      JWT_ISSUER: monetizeplus
-      JWT_AUDIENCE: monetizeplus-edge
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${LIC_API_PORT:-3000}
+      DATABASE_URL: postgres://${POSTGRES_USER:-monetizeplus}:${POSTGRES_PASSWORD:-monetizeplus123}@postgres:5432/${POSTGRES_DB:-monetizeplus}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      URL_PARSER_URL: http://url-parser:${URL_PARSER_PORT:-4000}
+      JWT_SECRET: ${JWT_SECRET:-super-secret-change-in-production}
+      JWT_ISSUER: ${JWT_ISSUER:-monetizeplus}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-monetizeplus-edge}
     ports:
-      - "3000:3000"
+      - "${LIC_API_PORT:-3000}:${LIC_API_PORT:-3000}"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${LIC_API_PORT:-3000}/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   url-parser:
     build:
@@ -51,11 +55,17 @@ services:
       dockerfile: Dockerfile
     image: paulandrewfarrow/monetizeplus-url-parser:latest
     environment:
-      NODE_ENV: production
-      PORT: 4000
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${URL_PARSER_PORT:-4000}
     ports:
-      - "4000:4000"
+      - "${URL_PARSER_PORT:-4000}:${URL_PARSER_PORT:-4000}"
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${URL_PARSER_PORT:-4000}/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   edge-worker:
     image: paulandrewfarrow/monetizeplus-edge-worker:latest
@@ -63,11 +73,17 @@ services:
       - licensing-api
       - redis
     environment:
-      NODE_ENV: production
-      LICENSING_API_URL: http://licensing-api:3000
-      REDIS_URL: redis://redis:6379
+      NODE_ENV: ${NODE_ENV:-production}
+      LICENSING_API_URL: http://licensing-api:${LIC_API_PORT:-3000}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
     ports:
-      - "3001:3001"
+      - "${EDGE_PORT:-3001}:${EDGE_PORT:-3001}"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${EDGE_PORT:-3001}/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   negotiation-agent:
     build:
@@ -78,14 +94,20 @@ services:
       - redis
       - licensing-api
     environment:
-      NODE_ENV: production
-      PORT: 3003
-      DATABASE_URL: postgres://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
-      REDIS_URL: redis://redis:6379
-      LICENSING_API_URL: http://licensing-api:3000
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${NEGOTIATION_PORT:-3003}
+      DATABASE_URL: postgres://${POSTGRES_USER:-monetizeplus}:${POSTGRES_PASSWORD:-monetizeplus123}@postgres:5432/${POSTGRES_DB:-monetizeplus}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      LICENSING_API_URL: http://licensing-api:${LIC_API_PORT:-3000}
     ports:
-      - "3003:3003"
+      - "${NEGOTIATION_PORT:-3003}:${NEGOTIATION_PORT:-3003}"
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${NEGOTIATION_PORT:-3003}/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   publisher-dashboard:
     build:
@@ -98,11 +120,17 @@ services:
       - licensing-api
       - edge-worker
     environment:
-      NODE_ENV: production
-      API_URL: http://licensing-api:3000
-      EDGE_URL: http://edge-worker:3001
+      NODE_ENV: ${NODE_ENV:-production}
+      API_URL: http://licensing-api:${LIC_API_PORT:-3000}
+      EDGE_URL: http://edge-worker:${EDGE_PORT:-3001}
     ports:
-      - "80:80"
+      - "${DASHBOARD_PORT:-80}:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
 volumes:
   pgdata:

@@ -85,12 +85,11 @@ All services should show as "Up" and healthy.
 
 ### Access Points
 
-- **Publisher Dashboard**: http://localhost:5173 (main UI)
-- **Edge Gateway**: http://localhost:8080 (main entry point)
+- **Publisher Dashboard**: http://localhost/ (main UI via Nginx)
+- **Edge Worker**: http://localhost:3001 (entry point for bot requests)
 - **Licensing API**: http://localhost:3000
 - **Negotiation Agent**: http://localhost:3003
-- **Publisher A**: http://localhost:8080 (Host: site-a.local)
-- **Publisher B**: http://localhost:8080 (Host: site-b.local)
+- **URL Parser**: http://localhost:4000
 - **PostgreSQL**: localhost:5432 (user: monetizeplus, db: monetizeplus)
 - **Redis**: localhost:6379
 

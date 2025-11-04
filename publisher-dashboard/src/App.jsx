@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Layout from './components/Layout';
+import PasswordGate from './components/PasswordGate';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import UsageLogs from './pages/UsageLogs';
@@ -15,10 +16,17 @@ import Notifications from './pages/Notifications';
 import './index.css';
 
 function App() {
+  const [passwordVerified, setPasswordVerified] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [publisherId, setPublisherId] = useState(null);
 
   useEffect(() => {
+    // Check if password was already verified
+    const storedPasswordVerified = localStorage.getItem('passwordVerified');
+    if (storedPasswordVerified === 'true') {
+      setPasswordVerified(true);
+    }
+    
     // Check if user is already logged in (simple localStorage check for MVP)
     const storedAuth = localStorage.getItem('isAuthenticated');
     const storedPublisherId = localStorage.getItem('publisherId');
@@ -27,6 +35,11 @@ function App() {
       setPublisherId(parseInt(storedPublisherId));
     }
   }, []);
+
+  const handlePasswordSuccess = () => {
+    setPasswordVerified(true);
+    localStorage.setItem('passwordVerified', 'true');
+  };
 
   const handleLogin = (pubId) => {
     setIsAuthenticated(true);
@@ -38,9 +51,15 @@ function App() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setPublisherId(null);
+    setPasswordVerified(false);
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('publisherId');
+    localStorage.removeItem('passwordVerified');
   };
+
+  if (!passwordVerified) {
+    return <PasswordGate onSuccess={handlePasswordSuccess} />;
+  }
 
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />;

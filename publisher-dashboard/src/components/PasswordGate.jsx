@@ -1,26 +1,23 @@
 import { useState } from 'react';
-import axios from 'axios';
 
-export default function Login({ onLogin }) {
-  const [publisherId, setPublisherId] = useState('1');
-  const [loading, setLoading] = useState(false);
+export default function PasswordGate({ onSuccess }) {
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    setLoading(true);
 
-    try {
-      // Verify publisher exists
-  const response = await axios.get(`/policies/${publisherId}`);
-      if (response.data) {
-        onLogin(parseInt(publisherId));
-      }
-    } catch (err) {
-      setError('Publisher not found or API unavailable');
-    } finally {
+    // Simple password check
+    if (password === 'PCM2025!') {
       setLoading(false);
+      onSuccess();
+    } else {
+      setLoading(false);
+      setError('Incorrect password');
+      setPassword('');
     }
   };
 
@@ -29,19 +26,18 @@ export default function Login({ onLogin }) {
       <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md border border-gray-700">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="publisherId" className="block text-sm font-medium text-gray-300 mb-2">
-              Select Account
+            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              Password
             </label>
-            <select
-              id="publisherId"
-              value={publisherId}
-              onChange={(e) => setPublisherId(e.target.value)}
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-100 focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-            >
-              <option value="1">Account 1</option>
-              <option value="2">Account 2</option>
-              <option value="4">Account 4</option>
-            </select>
+              placeholder="Enter password"
+              autoFocus
+            />
           </div>
 
           {error && (
@@ -55,10 +51,11 @@ export default function Login({ onLogin }) {
             disabled={loading}
             className="w-full bg-gray-700 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-gray-600"
           >
-            {loading ? 'Connecting...' : 'Continue'}
+            {loading ? 'Verifying...' : 'Continue'}
           </button>
         </form>
       </div>
     </div>
   );
 }
+

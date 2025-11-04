@@ -14,7 +14,6 @@ import {
   SparklesIcon,
   BellIcon
 } from '@heroicons/react/24/outline';
-import maiLogo from '../mai-logo.png';
 
 import { LICENSING_API as API_URL } from '../utils/apiConfig';
 
@@ -55,12 +54,11 @@ export default function Layout({ children, publisherId, onLogout }) {
         <div className="px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <Link to="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <img src={maiLogo} alt="MAI Logo" className="h-8" />
               <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Segoe UI, sans-serif' }}>
-                Monetize
+                Dashboard
               </h1>
             </Link>
-            <span className="text-sm text-gray-500">Publisher #{publisherId}</span>
+            <span className="text-sm text-gray-500">Account #{publisherId}</span>
           </div>
           <button
             onClick={onLogout}

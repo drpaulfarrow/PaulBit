@@ -12,7 +12,7 @@ docker --version
 docker-compose --version
 
 # Check required ports are available
-netstat -an | findstr "8080 3000 5432 6379"
+netstat -an | findstr "80 3001 3000 5432 6379"
 ```
 
 If ports are in use, stop conflicting services or modify `docker-compose.yml`.
@@ -46,10 +46,10 @@ You should see:
 
 ```powershell
 # Test 1: Human access (should work)
-curl -H "User-Agent: Mozilla/5.0" http://localhost:8080/
+curl -H "User-Agent: Mozilla/5.0" http://localhost:3001/
 
 # Test 2: Bot without token (should redirect)
-curl -i -H "User-Agent: GPTBot/1.0" http://localhost:8080/news/foo.html
+curl -i -H "User-Agent: GPTBot/1.0" http://localhost:3001/news/foo.html
 
 # Test 3: Get a token
 $response = Invoke-RestMethod -Uri "http://localhost:3000/token" `
@@ -61,7 +61,7 @@ $token = $response.token
 Write-Host "Token: $token"
 
 # Test 4: Access with token (should work)
-curl -H "User-Agent: GPTBot/1.0" "http://localhost:8080/news/foo.html?token=$token"
+curl -H "User-Agent: GPTBot/1.0" "http://localhost:3001/news/foo.html?token=$token"
 ```
 
 ## Step 3: Run Full Test Suite
@@ -92,8 +92,8 @@ curl http://localhost:3000/admin/logs?limit=10 | ConvertFrom-Json
 ```
 
 ### Access Publisher Sites
-- Publisher A: http://localhost:8080/ (news content)
-- Publisher B: http://localhost:8080/docs/a.html (documentation)
+- Publisher A: http://localhost:3001/ (news content)
+- Publisher B: http://localhost:3001/docs/a.html (documentation)
 
 ## Common Commands
 
@@ -182,11 +182,11 @@ docker-compose up -d
 ## Architecture at a Glance
 
 ```
-Browser/Bot → Edge (Nginx :8080) 
-  → Edge Worker (bot detection)
-    → Licensing API (token validation)
-      → Publisher A/B (content)
-  
+Browser/Bot → Edge Worker (:3001)
+  → Licensing API (:3000)
+    → Publisher A/B (content)
+
+UI: Publisher Dashboard (Nginx :80)
 Data: PostgreSQL (policies, usage)
 Cache: Redis (rate limits, tokens)
 ```
