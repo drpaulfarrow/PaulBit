@@ -66,7 +66,7 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/demo">
       <Layout publisherId={publisherId} onLogout={handleLogout}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
