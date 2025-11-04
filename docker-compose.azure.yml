@@ -55,9 +55,7 @@ services:
   publisher-dashboard:
     build:
       context: ./publisher-dashboard
-      dockerfile: Dockerfile
-      args:
-        NGINX_CONFIG: nginx.azure.conf
+      dockerfile: Dockerfile.azure
     image: paulandrewfarrow/monetizeplus-publisher-dashboard:azure
     depends_on:
       - licensing-api
