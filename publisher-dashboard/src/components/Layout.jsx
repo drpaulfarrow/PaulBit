@@ -86,6 +86,17 @@ export default function Layout({ children, publisherId, onLogout }) {
               <HomeIcon className="w-5 h-5" />
               Dashboard
             </Link>
+            <Link
+              to="/analytics"
+              className={`flex items-center gap-2 px-4 py-2 rounded-md ${
+                isActive('/analytics')
+                  ? 'bg-blue-100 text-blue-700 font-medium'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <ChartBarIcon className="w-5 h-5" />
+              Analytics
+            </Link>
             
             {/* Main Section */}
             <div className="pt-4 pb-1 px-2">

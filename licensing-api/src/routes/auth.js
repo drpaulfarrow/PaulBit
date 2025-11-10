@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const redis = require('../redis');
+const TokenModel = require('../models/Token');
 
 const router = express.Router();
 
@@ -220,11 +221,15 @@ router.post('/token', async (req, res) => {
     await redis.addTokenToAllowlist(jti, ttl);
 
     // Store token in database
-    await db.query(
-      `INSERT INTO tokens (jti, client_id, publisher_id, url_pattern, purpose, expires_at, revoked)
-       VALUES ($1, $2, $3, $4, $5, to_timestamp($6), false)`,
-      [jti, client_id, publisher.id, url, purpose, exp]
-    );
+    await TokenModel.storeIssuedToken({
+      jti,
+      clientId: client_id,
+      publisherId: publisher.id,
+      url,
+      purpose,
+      expiresAt: new Date(exp * 1000),
+      tokenValue: token,
+    });
 
     res.json({
       token: token,

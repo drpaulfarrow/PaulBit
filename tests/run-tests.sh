@@ -8,7 +8,8 @@ echo "Content Licensing Gateway - Test Suite"
 echo "=========================================="
 echo ""
 
-BASE_URL="http://localhost:8080"
+# Edge worker now listens on 3001 (see docker-compose.yml)
+BASE_URL="http://localhost:3001"
 LICENSING_URL="http://localhost:3000"
 
 # Colors for output

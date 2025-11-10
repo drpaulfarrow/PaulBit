@@ -25,6 +25,9 @@ const urlsRoutes = require('./routes/urls');
 const negotiationsRoutes = require('./routes/negotiations');
 const logsRoutes = require('./routes/logs');
 const scraperRoutes = require('./routes/scraper');
+const agentClassifier = require('./services/agentClassifier');
+const metricsRollup = require('./jobs/metricsRollup');
+const alertEvaluator = require('./jobs/alertEvaluator');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -86,6 +89,15 @@ async function start() {
     
     await redis.initialize();
     console.log('Redis initialized');
+
+    await agentClassifier.initialize();
+    console.log('Agent classifier initialized');
+
+    metricsRollup.schedule();
+    console.log('Telemetry rollup scheduler started');
+
+    alertEvaluator.schedule();
+    console.log('Alert evaluation scheduler started');
     
     app.listen(PORT, () => {
       console.log(`Licensing API listening on port ${PORT}`);

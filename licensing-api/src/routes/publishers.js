@@ -10,7 +10,11 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const result = await db.query(
-      'SELECT id, name, hostname, created_at FROM publishers ORDER BY id ASC'
+      `SELECT p.id, p.name, p.hostname, p.contact_email, p.api_key_hash, p.plan_id, p.created_at, p.updated_at,
+              plans.name AS plan_name
+       FROM publishers p
+       LEFT JOIN plans ON plans.id = p.plan_id
+       ORDER BY p.id ASC`
     );
     res.json({ publishers: result.rows });
   } catch (error) {
@@ -28,7 +32,11 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
     
     const result = await db.query(
-      'SELECT id, name, hostname, created_at FROM publishers WHERE id = $1',
+      `SELECT p.id, p.name, p.hostname, p.contact_email, p.api_key_hash, p.plan_id, p.created_at, p.updated_at,
+              plans.name AS plan_name
+       FROM publishers p
+       LEFT JOIN plans ON plans.id = p.plan_id
+       WHERE p.id = $1`,
       [id]
     );
     
@@ -40,7 +48,12 @@ router.get('/:id', async (req, res) => {
       publisher_id: result.rows[0].id,
       name: result.rows[0].name,
       hostname: result.rows[0].hostname,
-      created_at: result.rows[0].created_at
+      contact_email: result.rows[0].contact_email,
+      api_key_hash: result.rows[0].api_key_hash,
+      plan_id: result.rows[0].plan_id,
+      plan_name: result.rows[0].plan_name,
+      created_at: result.rows[0].created_at,
+      updated_at: result.rows[0].updated_at
     });
   } catch (error) {
     console.error('Error fetching publisher:', error);

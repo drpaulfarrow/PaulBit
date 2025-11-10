@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import PasswordGate from './components/PasswordGate';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Analytics from './pages/Analytics';
 import UsageLogs from './pages/UsageLogs';
 import Grounding from './pages/Grounding';
 import UrlLibrary from './pages/UrlLibrary';
@@ -71,6 +72,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard publisherId={publisherId} />} />
+          <Route path="/analytics" element={<Analytics publisherId={publisherId} />} />
           <Route path="/urls" element={<UrlLibrary />} />
           <Route path="/licenses" element={<LicenseWizard publisherId={publisherId} />} />
           <Route path="/access" element={<AccessConfiguration publisherId={publisherId} />} />

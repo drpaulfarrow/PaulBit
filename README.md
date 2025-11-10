@@ -65,7 +65,7 @@ Request -->│  • Bot detect (UA/IP/Rate) │──┐
 
 - Docker & Docker Compose
 - 8GB RAM recommended
-- Ports 3000, 3003, 4000, 5173, 5432, 6379, 8080, 8081, 8082 available
+- Ports 80, 3000, 3001, 3003, 4000, 5173, 5432, 6379, 8081, 8082 available
 
 ### Start Services
 
@@ -93,22 +93,33 @@ All services should show as "Up" and healthy.
 - **PostgreSQL**: localhost:5432 (user: monetizeplus, db: monetizeplus)
 - **Redis**: localhost:6379
 
+### Telemetry & Analytics
+
+- **Log Ingestion API**: `POST http://localhost:3000/api/logs/ingest`
+  - Authenticate with `X-PaulBit-Key`. For local sample data the raw key is `publisher-{id}-ingest`
+    (the API persists the SHA-256 hash).
+  - Accepts NDJSON or JSON arrays from platforms such as Fastly, Cloudflare, and Akamai.
+- **Aggregated Metrics**: `/api/logs/summary` exposes hourly/daily rollups (`aggregated_metrics` table).
+- **Ingestion Sources**: `/api/logs/sources` for managing CDN integrations.
+- **Alerts API**: `/api/logs/alerts` for webhook-based anomaly detection (bot ratio, error rate, latency spikes, traffic drops).
+
 ## 📋 Running Tests
 
 ### Automated Tests (PowerShell on Windows)
 
 ```powershell
 cd tests
-.\run-tests.ps1
+.\run-automation.ps1
 ```
 
 ### Automated Tests (Bash on Linux/Mac)
 
 ```bash
-cd tests
-chmod +x run-tests.sh
-./run-tests.sh
+chmod +x tests/run-automation.sh
+tests/run-automation.sh
 ```
+
+This wrapper installs frontend/backend test dependencies, runs their suites (`npm test` in each workspace), and finishes with the edge gateway smoke tests.
 
 ### Manual Testing
 
@@ -120,7 +131,8 @@ See `tests/MANUAL_TESTS.md` for detailed manual test cases.
 
 ```bash
 curl -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
-     http://localhost:8080/news/foo.html
+     -H "Host: site-a.local" \
+     http://localhost:3001/news/foo.html
 ```
 
 **Result**: HTTP 200, content returned immediately
@@ -129,7 +141,8 @@ curl -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
 
 ```bash
 curl -i -H "User-Agent: GPTBot/1.0" \
-        http://localhost:8080/news/foo.html
+        -H "Host: site-a.local" \
+        http://localhost:3001/news/foo.html
 ```
 
 **Result**: HTTP 302 redirect to authorization page
@@ -164,7 +177,8 @@ curl -X POST http://localhost:3000/token \
 
 ```bash
 curl -H "User-Agent: GPTBot/1.0" \
-     "http://localhost:8080/news/foo.html?token=YOUR_TOKEN_HERE"
+     -H "Host: site-a.local" \
+     "http://localhost:3001/news/foo.html?token=YOUR_TOKEN_HERE"
 ```
 
 **Result**: HTTP 200, content returned, usage metered

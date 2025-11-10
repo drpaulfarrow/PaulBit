@@ -95,6 +95,28 @@ curl http://localhost:3000/admin/logs?limit=10 | ConvertFrom-Json
 - Publisher A: http://localhost:3001/ (news content)
 - Publisher B: http://localhost:3001/docs/a.html (documentation)
 
+### Telemetry Ingestion (Optional)
+
+```bash
+# Post NDJSON telemetry records (replace X-PaulBit-Key with publisher's hashed key)
+curl -X POST http://localhost:3000/api/logs/ingest \
+  -H "Content-Type: application/json" \
+  -H "X-PaulBit-Key: <publisher-api-key>" \
+  -d '[
+    {
+      "timestamp": "2025-01-01T12:00:00Z",
+      "host": "site-a.local",
+      "url": "https://site-a.local/news/foo.html",
+      "method": "GET",
+      "status": 200,
+      "user_agent": "GPTBot/1.0",
+      "country": "US",
+      "latency_ms": 120,
+      "source": "fastly"
+    }
+  ]'
+```
+
 ## Common Commands
 
 ```powershell
