@@ -14,11 +14,10 @@ services:
     depends_on:
       - urlparser
     environment:
-      NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}
+      # Azure App Service automatically injects app settings as environment variables
+      # DATABASE_URL, JWT_SECRET, NODE_ENV are set via Azure App Settings
       REDIS_ENABLED: "false"
       URL_PARSER_URL: http://urlparser:4000
-      JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: monetizeplus
       JWT_AUDIENCE: monetizeplus-edge
       PORT: "3000"
