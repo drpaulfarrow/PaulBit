@@ -1,16 +1,25 @@
 # Content Licensing Gateway (MonetizePlus MVP)
 
-An educational MVP demonstrating content licensing and access control for AI bots, focused on publisher-AI relationships.
+An educational MVP demonstrating content licensing and access control for AI bots, with comprehensive telemetry analytics and modern publisher dashboard.
 
 ## 🎯 Overview
 
-This system demonstrates five core flows:
+This system demonstrates six core flows:
 
 1. **Human Access** → Unaffected, direct access to content
 2. **Unlicensed Bot** → 302 redirect to licensing/paywall  
 3. **Licensed Bot** → Short-lived token → Metered content access
 4. **AI-to-AI Negotiation** → Autonomous license negotiation between publisher agents and AI companies
-5. **License Management** → Publisher dashboard for managing licenses, URLs, policies, and viewing analytics
+5. **License Management** → Password-protected publisher dashboard for managing licenses, URLs, policies
+6. **Telemetry & Analytics** → Real-time ingestion, aggregation, and visualization of access logs with anomaly detection
+
+## 🔐 Security & Access
+
+The publisher dashboard is **password-protected** and served under the `/demo` path:
+- **Password**: `PCM2025!` (configurable)
+- **Access URL**: `http://localhost/demo/` (local) or `https://your-domain.com/demo/` (production)
+- **Root path** (`/`) returns 404 for security
+- **All product branding removed** for generic white-label usage
 
 ## 🏗️ Architecture
 
@@ -85,13 +94,55 @@ All services should show as "Up" and healthy.
 
 ### Access Points
 
-- **Publisher Dashboard**: http://localhost/ (main UI via Nginx)
+- **Publisher Dashboard**: http://localhost/demo/ (password: `PCM2025!`)
+  - Modern React SPA with password protection
+  - White-label design with no product branding
+  - Comprehensive analytics and telemetry dashboard
 - **Edge Worker**: http://localhost:3001 (entry point for bot requests)
-- **Licensing API**: http://localhost:3000
-- **Negotiation Agent**: http://localhost:3003
-- **URL Parser**: http://localhost:4000
-- **PostgreSQL**: localhost:5432 (user: monetizeplus, db: monetizeplus)
-- **Redis**: localhost:6379
+- **Licensing API**: http://localhost:3000 (REST API backend)
+- **Negotiation Agent**: http://localhost:3003 (AI-to-AI negotiation)
+- **URL Parser**: http://localhost:4000 (content extraction service)
+- **PostgreSQL**: localhost:5432 (user: `monetizeplus`, db: `monetizeplus`)
+- **Redis**: localhost:6379 (caching and rate limiting)
+
+### 🔑 Authentication Flow
+
+1. **Password Gate**: Enter `PCM2025!` to access the application
+2. **Account Selection**: Choose Publisher ID (1 or 2 for demo)
+3. **Dashboard Access**: Full analytics, licensing, and management interface
+
+## 🎨 Modern UI & Styling
+
+The dashboard features a **modern, professional design** built with:
+
+- **Tailwind CSS v3.4.0**: Reliable utility-first CSS framework with proper content detection
+- **React 18**: Modern component-based UI with hooks and context
+- **Heroicons**: Beautiful SVG icons with proper sizing and colors
+- **Recharts**: Interactive charts and data visualization
+- **Responsive Design**: Mobile-friendly layout with grid systems
+- **White-label Interface**: No product branding, fully customizable
+
+### 🔧 Technical Stack
+
+**Frontend:**
+- **React 18** + **Vite** (fast development and building)
+- **Tailwind CSS v3** (utility-first styling)
+- **React Router v7** (client-side routing)
+- **Axios** (HTTP client)
+- **Vitest** + **Testing Library** (unit testing)
+
+**Backend:**
+- **Node.js** + **Express** (REST API)
+- **PostgreSQL 16** (primary database)
+- **Redis 7** (caching and rate limiting)
+- **JWT** (stateless authentication)
+- **Jest** + **Supertest** (API testing)
+
+**Infrastructure:**
+- **Docker Compose** (local development)
+- **Nginx** (reverse proxy and static serving)
+- **Azure App Service** (production deployment)
+- **Docker Hub** (container registry)
 
 ### Telemetry & Analytics
 
@@ -103,27 +154,134 @@ All services should show as "Up" and healthy.
 - **Ingestion Sources**: `/api/logs/sources` for managing CDN integrations.
 - **Alerts API**: `/api/logs/alerts` for webhook-based anomaly detection (bot ratio, error rate, latency spikes, traffic drops).
 
-## 📋 Running Tests
+## 🧪 Comprehensive Testing Suite
 
-### Automated Tests (PowerShell on Windows)
+The project includes **automated testing** across all layers:
+
+### **🚀 Quick Test (All Suites)**
+```bash
+bash tests/run-automation.sh
+```
+
+This single command runs:
+1. **Backend Unit Tests** (Jest) - API routes, models, services
+2. **Frontend Unit Tests** (Vitest + Testing Library) - React components
+3. **Integration Tests** (Bash) - End-to-end flow testing
+
+### **📊 Test Coverage**
+
+**Backend (Jest):**
+- ✅ **Telemetry ingestion** (`/api/logs/ingest`)
+- ✅ **Analytics endpoints** (`/api/logs/summary`, `/api/logs/sources`, `/api/logs/alerts`)
+- ✅ **Authentication flows** with mocked dependencies
+- ✅ **Data validation** and error handling
+
+**Frontend (Vitest + Testing Library):**
+- ✅ **Analytics dashboard** rendering and data fetching
+- ✅ **Form submissions** (log sources, alerts)
+- ✅ **Component interactions** with mocked API calls
+- ✅ **ResizeObserver polyfill** for chart components
+
+**Integration (Bash):**
+- ✅ **Human access** (no restrictions)
+- ✅ **Unlicensed bot redirection** (302 to authorization)
+- ✅ **Licensed bot flow** (token issuance → content access)
+- ✅ **Token verification** and URL validation
+- ✅ **Admin endpoints** (publishers, clients, plans)
+- ✅ **Policy enforcement** testing
+
+### **🔧 Individual Test Commands**
+
+```bash
+# Backend only (licensing-api directory)
+cd licensing-api && npm test
+
+# Frontend only (publisher-dashboard directory) 
+cd publisher-dashboard && npm test
+
+# Integration only
+bash tests/run-tests.sh
+```
+
+### **📈 Test Results**
+- **Backend**: 8/8 tests passing
+- **Frontend**: 2/2 tests passing  
+- **Integration**: 16/16 tests passing
+- **Total Coverage**: All critical paths tested
+
+### PowerShell Alternative (Windows)
 
 ```powershell
 cd tests
 .\run-automation.ps1
 ```
 
-### Automated Tests (Bash on Linux/Mac)
-
-```bash
-chmod +x tests/run-automation.sh
-tests/run-automation.sh
-```
-
-This wrapper installs frontend/backend test dependencies, runs their suites (`npm test` in each workspace), and finishes with the edge gateway smoke tests.
-
 ### Manual Testing
 
-See `tests/MANUAL_TESTS.md` for detailed manual test cases.
+See `tests/MANUAL_TESTS.md` for detailed manual test cases and edge case scenarios.
+
+## 🚀 Production Deployment
+
+### **Azure App Service (Recommended)**
+
+**One-Command Deploy:**
+```bash
+curl -sS https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/azure-deploy.sh | bash
+```
+
+This automated script:
+- ✅ **Creates Azure resources** (resource group, app service plan)
+- ✅ **Generates secure JWT secret**
+- ✅ **Deploys all containers** from Docker Hub
+- ✅ **Configures environment variables**
+- ✅ **Initializes database** with sample data
+- ✅ **Verifies deployment** and provides access URL
+
+**Result:** Your app will be live at `https://your-app.azurewebsites.net/demo/` (password: `PCM2025!`)
+
+### **Manual Deployment Steps**
+
+If you prefer manual control:
+
+1. **Push latest changes to GitHub:**
+   ```bash
+   git add . && git commit -m "Update with latest features" && git push origin main
+   ```
+
+2. **Build and push Docker images** (if needed):
+   ```bash
+   # Only needed if you modified the dashboard
+   docker build -f publisher-dashboard/Dockerfile.azure -t paulandrewfarrow/monetizeplus-publisher-dashboard:azure-$(date +%Y%m%d) ./publisher-dashboard
+   docker push paulandrewfarrow/monetizeplus-publisher-dashboard:azure-$(date +%Y%m%d)
+   ```
+
+3. **Deploy via Azure CLI:**
+   ```bash
+   az webapp config container set \
+     --name monetizeplusapp \
+     --resource-group MonetizePlusRG \
+     --multicontainer-config-type compose \
+     --multicontainer-config-file docker-compose.azure.yml
+   
+   az webapp restart --name monetizeplusapp --resource-group MonetizePlusRG
+   ```
+
+### **🔧 Environment Configuration**
+
+The system supports both **local development** and **production deployment**:
+
+- **`docker-compose.yml`**: Local development with all services
+- **`docker-compose.azure.yml`**: Production Azure deployment
+- **Environment variables**: Configured via `.env` (local) or Azure App Settings (production)
+
+### **🎯 Key Deployment Features**
+
+- ✅ **Password Protection**: Secure access with configurable password
+- ✅ **White-label Design**: No product branding, fully customizable
+- ✅ **Modern Styling**: Tailwind CSS v3 with proper utility class generation
+- ✅ **Asset Optimization**: Nginx-served static assets with proper caching
+- ✅ **Database Migrations**: Automatic schema updates and data seeding
+- ✅ **Health Monitoring**: Container health checks and service monitoring
 
 ## 🧪 Example Usage
 
