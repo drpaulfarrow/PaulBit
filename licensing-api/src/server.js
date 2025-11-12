@@ -25,7 +25,8 @@ const urlsRoutes = require('./routes/urls');
 const negotiationsRoutes = require('./routes/negotiations');
 const logsRoutes = require('./routes/logs');
 const scraperRoutes = require('./routes/scraper');
-const googleAuthRoutes = require('./routes/google-auth');
+// TODO: Google auth - temporarily disabled until database migration runs
+// const googleAuthRoutes = require('./routes/google-auth');
 const agentClassifier = require('./services/agentClassifier');
 const metricsRollup = require('./jobs/metricsRollup');
 const alertEvaluator = require('./jobs/alertEvaluator');
@@ -67,7 +68,8 @@ app.use('/api/urls', urlsRoutes);
 app.use('/api/negotiations', negotiationsRoutes);
 app.use('/api/logs', logsRoutes);
 app.use('/api/scraper', scraperRoutes);
-app.use('/api/auth', googleAuthRoutes);
+// TODO: Enable Google OAuth after running migration 023
+// app.use('/api/auth', googleAuthRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
