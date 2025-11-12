@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  // Tailwind v3 - should auto-detect all classes properly
   theme: {
     extend: {
       colors: {

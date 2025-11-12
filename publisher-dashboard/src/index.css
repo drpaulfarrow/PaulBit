@@ -2,8 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Let Tailwind handle utility classes automatically */
+
 /* ========================================
-   MAI DESIGN SYSTEM
+   MAI DESIGN SYSTEM - v2
    ======================================== */
 
 :root {

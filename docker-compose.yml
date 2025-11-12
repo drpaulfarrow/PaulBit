@@ -130,7 +130,7 @@ services:
     ports:
       - "${DASHBOARD_PORT:-80}:80"
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost/ >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost/demo/ >/dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
