@@ -21,6 +21,8 @@ services:
       JWT_ISSUER: monetizeplus
       JWT_AUDIENCE: monetizeplus-edge
       PORT: "3000"
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
     ports:
       - "3000:3000"
     restart: unless-stopped
@@ -47,6 +49,8 @@ services:
     build:
       context: ./publisher-dashboard
       dockerfile: Dockerfile.azure
+      args:
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
     image: paulandrewfarrow/monetizeplus-publisher-dashboard:azure-20251112
     depends_on:
       - licensing-api

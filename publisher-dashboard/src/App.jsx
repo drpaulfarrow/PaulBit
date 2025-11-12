@@ -24,6 +24,14 @@ import './index.css';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const USE_GOOGLE_AUTH = GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID.length > 0;
 
+const setSessionToken = (token) => {
+  if (token) {
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+  } else {
+    delete axios.defaults.headers.common.Authorization;
+  }
+};
+
 function AppContent() {
   const [user, setUser] = useState(null);
   const [publishers, setPublishers] = useState([]);
@@ -53,6 +61,7 @@ function AppContent() {
           if (response.data.valid) {
             setUser(response.data.user);
             setPublishers(response.data.user.publishers || []);
+            setSessionToken(token);
             
             if (storedPublisherId) {
               setPublisherId(parseInt(storedPublisherId));
@@ -60,11 +69,13 @@ function AppContent() {
           } else {
             localStorage.removeItem('sessionToken');
             localStorage.removeItem('publisherId');
+            setSessionToken(null);
           }
         } catch (error) {
           console.error('Session verification failed:', error);
           localStorage.removeItem('sessionToken');
           localStorage.removeItem('publisherId');
+          setSessionToken(null);
         }
       }
     } else {
@@ -95,6 +106,7 @@ function AppContent() {
         setUser(response.data.user);
         setPublishers(response.data.publishers);
         localStorage.setItem('sessionToken', response.data.token);
+        setSessionToken(response.data.token);
         
         // If user has only one publisher, auto-select it
         if (response.data.publishers.length === 1) {
@@ -119,6 +131,7 @@ function AppContent() {
     setPublisherId(null);
     setIsAuthenticated(false);
     setPasswordVerified(false);
+    setSessionToken(null);
     localStorage.removeItem('sessionToken');
     localStorage.removeItem('publisherId');
     localStorage.removeItem('isAuthenticated');

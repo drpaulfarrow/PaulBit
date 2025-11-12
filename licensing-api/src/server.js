@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const db = require('./db');
@@ -25,8 +26,7 @@ const urlsRoutes = require('./routes/urls');
 const negotiationsRoutes = require('./routes/negotiations');
 const logsRoutes = require('./routes/logs');
 const scraperRoutes = require('./routes/scraper');
-// TODO: Google auth - temporarily disabled until database migration runs
-// const googleAuthRoutes = require('./routes/google-auth');
+const googleAuthRoutes = require('./routes/google-auth');
 const agentClassifier = require('./services/agentClassifier');
 const metricsRollup = require('./jobs/metricsRollup');
 const alertEvaluator = require('./jobs/alertEvaluator');
@@ -67,9 +67,8 @@ app.use('/api/publishers', publishersRoutes);
 app.use('/api/urls', urlsRoutes);
 app.use('/api/negotiations', negotiationsRoutes);
 app.use('/api/logs', logsRoutes);
+app.use('/api/auth', googleAuthRoutes);
 app.use('/api/scraper', scraperRoutes);
-// TODO: Enable Google OAuth after running migration 023
-// app.use('/api/auth', googleAuthRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

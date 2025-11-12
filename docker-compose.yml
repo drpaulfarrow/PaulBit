@@ -40,6 +40,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-super-secret-change-in-production}
       JWT_ISSUER: ${JWT_ISSUER:-monetizeplus}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-monetizeplus-edge}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
     ports:
       - "${LIC_API_PORT:-3000}:${LIC_API_PORT:-3000}"
     healthcheck:
@@ -126,6 +128,7 @@ services:
       dockerfile: Dockerfile
       args:
         NGINX_CONFIG: nginx.conf
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
     image: paulandrewfarrow/monetizeplus-publisher-dashboard:latest
     depends_on:
       - licensing-api
