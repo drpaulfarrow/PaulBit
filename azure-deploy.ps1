@@ -74,19 +74,22 @@ az webapp config container set `
 Write-Host "✅ Container settings configured" -ForegroundColor Green
 Write-Host ""
 
-# Step 7: Set environment variables
+# Step 7: Set environment variables (using Azure Database for PostgreSQL)
 Write-Host "📝 Step 7: Setting environment variables..." -ForegroundColor Yellow
+Write-Host "   Using managed Azure Database for PostgreSQL..." -ForegroundColor Gray
+$DB_PASSWORD = if (Test-Path "C:\tmp\db_password.txt") { Get-Content "C:\tmp\db_password.txt" } else { "YOUR_DB_PASSWORD_HERE" }
 az webapp config appsettings set `
   --name $APP_NAME `
   --resource-group $RESOURCE_GROUP `
   --settings `
     REDIS_ENABLED=false `
     NODE_ENV=production `
-    DATABASE_URL="postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus" `
+    DATABASE_URL="postgresql://monetizeplus:$DB_PASSWORD@monetizeplus-db.postgres.database.azure.com:5432/monetizeplus?sslmode=require" `
     JWT_SECRET="$JWT_SECRET" `
     JWT_ISSUER=monetizeplus `
     JWT_AUDIENCE=monetizeplus-edge
 Write-Host "✅ Environment variables set" -ForegroundColor Green
+Write-Host "✅ Database: monetizeplus-db.postgres.database.azure.com" -ForegroundColor Green
 Write-Host ""
 
 # Step 8: Restart the app

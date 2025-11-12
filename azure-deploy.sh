@@ -86,21 +86,24 @@ az webapp config container set \
 echo "✅ Container settings updated"
 echo ""
 
-# Step 7: Set environment variables
+# Step 7: Set environment variables (using Azure Database for PostgreSQL)
 echo "📝 Step 7: Setting environment variables..."
+echo "   Using managed Azure Database for PostgreSQL..."
+DB_PASSWORD=$(cat /tmp/db_password.txt 2>/dev/null || echo "YOUR_DB_PASSWORD_HERE")
 az webapp config appsettings set \
   --name $APP_NAME \
   --resource-group $RESOURCE_GROUP \
   --settings \
     REDIS_ENABLED=false \
     NODE_ENV=production \
-    DATABASE_URL="postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus" \
+    DATABASE_URL="postgresql://monetizeplus:${DB_PASSWORD}@monetizeplus-db.postgres.database.azure.com:5432/monetizeplus?sslmode=require" \
     JWT_SECRET="$JWT_SECRET" \
     JWT_ISSUER=monetizeplus \
     JWT_AUDIENCE=monetizeplus-edge \
     WEBSITES_ENABLE_APP_SERVICE_STORAGE=false \
     DOCKER_ENABLE_CI=true > /dev/null
 echo "✅ Environment variables set"
+echo "✅ Database: monetizeplus-db.postgres.database.azure.com"
 echo ""
 
 # Step 8: Force pull of latest images

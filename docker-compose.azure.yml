@@ -1,22 +1,9 @@
 version: '3.8'
 
 services:
-  # PostgreSQL database
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: monetizeplus
-      POSTGRES_PASSWORD: monetizeplus123
-      POSTGRES_DB: monetizeplus
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U monetizeplus"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
+  # NOTE: Using Azure Database for PostgreSQL (Managed Service)
+  # No containerized postgres needed - connecting to monetizeplus-db.postgres.database.azure.com
+  # Data persists across deployments with automatic backups
 
   # Licensing API - authentication, tokens, metering, policies
   licensing-api:
@@ -25,13 +12,10 @@ services:
       dockerfile: Dockerfile
     image: paulandrewfarrow/monetizeplus-licensing-api:latest
     depends_on:
-      postgres:
-        condition: service_healthy
-      urlparser:
-        condition: service_started
+      - urlparser
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://monetizeplus:monetizeplus123@postgres:5432/monetizeplus
+      DATABASE_URL: ${DATABASE_URL}
       REDIS_ENABLED: "false"
       URL_PARSER_URL: http://urlparser:4000
       JWT_SECRET: ${JWT_SECRET}
