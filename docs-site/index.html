@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaulBit Documentation</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #1e293b;
+            color: #fff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        .nav-section {
+            padding: 1rem 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .nav-section-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.625rem 1.5rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background: #334155;
+            color: #fff;
+        }
+
+        .nav-link.active {
+            background: #3b82f6;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .doc-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .doc-content h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #0f172a;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .doc-content h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .doc-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #334155;
+        }
+
+        .doc-content p {
+            margin-bottom: 1rem;
+            color: #475569;
+        }
+
+        .doc-content a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .doc-content a:hover {
+            text-decoration: underline;
+        }
+
+        .doc-content code {
+            background: #f1f5f9;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.875em;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+        }
+
+        .doc-content pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .doc-content pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .doc-content ul, .doc-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .doc-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .doc-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .doc-content th, .doc-content td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        .doc-content th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .doc-content blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .home-content {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .home-content h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1rem;
+        }
+
+        .home-content p {
+            font-size: 1.25rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        .home-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .home-link-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .home-link-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .home-link-card h3 {
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+
+        .home-link-card p {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            margin-bottom: 1rem;
+        }
+
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-purple {
+            background: #e9d5ff;
+            color: #6b21a8;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+            }
+
+            .content-wrapper {
+                padding: 1rem;
+            }
+
+            .doc-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>📚 PaulBit Docs</h1>
+            <p>Content Licensing Gateway</p>
+        </div>
+
+        <nav>
+            <div class="nav-section">
+                <div class="nav-section-title">Getting Started</div>
+                <a class="nav-link" onclick="loadDoc('README.md')">📖 Overview & Quick Start</a>
+                <a class="nav-link" onclick="loadDoc('QUICKSTART.md')">🚀 Quick Start Guide</a>
+                <a class="nav-link" onclick="loadDoc('QUICKSTART_AZURE.md')">☁️ Azure Quick Start</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Architecture & Design</div>
+                <a class="nav-link" onclick="loadDoc('ARCHITECTURE.md')">🏗️ System Architecture</a>
+                <a class="nav-link" onclick="loadDoc('PROJECT_SUMMARY.md')">📋 Project Summary</a>
+                <a class="nav-link" onclick="loadDoc('DEVELOPMENT_WORKFLOW.md')">⚙️ Development Workflow</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Features & Guides</div>
+                <a class="nav-link" onclick="loadDoc('NEGOTIATION_ARCHITECTURE.md')">🤝 Negotiation System</a>
+                <a class="nav-link" onclick="loadDoc('NEGOTIATION_SETUP.md')">📝 Negotiation Setup</a>
+                <a class="nav-link" onclick="loadDoc('NEGOTIATION_UI_GUIDE.md')">🎨 Negotiation UI Guide</a>
+                <a class="nav-link" onclick="loadDoc('NEGOTIATION_QUICKREF.md')">⚡ Negotiation Quick Ref</a>
+                <a class="nav-link" onclick="loadDoc('POLICY_FLOW.md')">📜 Policy Flow</a>
+                <a class="nav-link" onclick="loadDoc('POLICY_TESTER_GUIDE.md')">🧪 Policy Tester</a>
+                <a class="nav-link" onclick="loadDoc('URL_LIBRARY_SETUP.md')">📚 URL Library</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">API Reference</div>
+                <a class="nav-link" onclick="loadDoc('API_REFERENCE_CM_RTBSPEC.md')">🔌 API Reference</a>
+                <a class="nav-link" onclick="loadDoc('CM_RTBSPEC_IMPLEMENTATION.md')">⚙️ CM_RTBSPEC Implementation</a>
+                <a class="nav-link" onclick="loadDoc('ACCESS_ENDPOINTS_GUIDE.md')">🔗 Access Endpoints Guide</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Deployment</div>
+                <a class="nav-link" onclick="loadDoc('deploy.md')">🚢 Deployment Guide</a>
+                <a class="nav-link" onclick="loadDoc('DEV_VS_AZURE_DEPLOYMENT.md')">☁️ Dev vs Azure</a>
+                <a class="nav-link" onclick="loadDoc('AZURE_DEPLOYMENT_FIX.md')">🔧 Azure Fixes</a>
+                <a class="nav-link" onclick="loadDoc('AZURE_DATABASE_MIGRATION.md')">💾 Database Migration</a>
+                <a class="nav-link" onclick="loadDoc('AZURE_MIGRATION_GUIDE.md')">📦 Azure Migration</a>
+                <a class="nav-link" onclick="loadDoc('AZURE_DB_INIT.md')">🗄️ Azure DB Init</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Testing</div>
+                <a class="nav-link" onclick="loadDoc('UI_TEST_README.md')">🧪 UI Testing</a>
+                <a class="nav-link" onclick="loadDoc('TEST_NEGOTIATIONS.md')">🤝 Negotiation Tests</a>
+                <a class="nav-link" onclick="loadDoc('tests/MANUAL_TESTS.md')">✋ Manual Tests</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Reference</div>
+                <a class="nav-link" onclick="loadDoc('CHANGELOG.md')">📝 Changelog</a>
+                <a class="nav-link" onclick="loadDoc('ACCEPT_REJECT_IMPLEMENTATION.md')">✅ Accept/Reject Flow</a>
+                <a class="nav-link" onclick="loadDoc('POLICY_CREATION_UPDATED.md')">📋 Policy Creation</a>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-wrapper">
+            <div id="doc-container">
+                <div class="home-content">
+                    <h1>📚 PaulBit Documentation</h1>
+                    <p>Comprehensive guides for the Content Licensing Gateway</p>
+
+                    <div class="home-links">
+                        <div class="home-link-card" onclick="loadDoc('README.md')">
+                            <span class="badge badge-blue">Start Here</span>
+                            <h3>Overview & Quick Start</h3>
+                            <p>Complete introduction to the PaulBit platform with setup instructions</p>
+                        </div>
+
+                        <div class="home-link-card" onclick="loadDoc('ARCHITECTURE.md')">
+                            <span class="badge badge-purple">Architecture</span>
+                            <h3>System Architecture</h3>
+                            <p>Deep dive into the microservices architecture and data flows</p>
+                        </div>
+
+                        <div class="home-link-card" onclick="loadDoc('API_REFERENCE_CM_RTBSPEC.md')">
+                            <span class="badge badge-green">API</span>
+                            <h3>API Reference</h3>
+                            <p>Complete API documentation for integration and development</p>
+                        </div>
+
+                        <div class="home-link-card" onclick="loadDoc('NEGOTIATION_ARCHITECTURE.md')">
+                            <span class="badge badge-blue">Feature</span>
+                            <h3>AI Negotiation System</h3>
+                            <p>Learn about autonomous AI-to-AI license negotiation</p>
+                        </div>
+
+                        <div class="home-link-card" onclick="loadDoc('ACCESS_ENDPOINTS_GUIDE.md')">
+                            <span class="badge badge-green">Configuration</span>
+                            <h3>Access Endpoints</h3>
+                            <p>Configure different access methods for your content</p>
+                        </div>
+
+                        <div class="home-link-card" onclick="loadDoc('deploy.md')">
+                            <span class="badge badge-purple">Deployment</span>
+                            <h3>Deployment Guide</h3>
+                            <p>Deploy to Azure and manage production environments</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Base URL for fetching markdown files
+        const BASE_URL = window.location.origin;
+
+        // Configure marked options
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            headerIds: true,
+            mangle: false
+        });
+
+        async function loadDoc(filename) {
+            const container = document.getElementById('doc-container');
+            
+            try {
+                // Show loading state
+                container.innerHTML = '<div class="doc-content"><p>Loading...</p></div>';
+                
+                // Update active link
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                event?.target?.classList.add('active');
+
+                // Fetch markdown file
+                const response = await fetch(`${BASE_URL}/docs-content/${filename}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load ${filename}`);
+                }
+                
+                const markdown = await response.text();
+                
+                // Convert markdown to HTML
+                const html = marked.parse(markdown);
+                
+                // Render content
+                container.innerHTML = `<div class="doc-content">${html}</div>`;
+                
+                // Scroll to top
+                document.querySelector('.main-content').scrollTop = 0;
+                
+            } catch (error) {
+                console.error('Error loading document:', error);
+                container.innerHTML = `
+                    <div class="doc-content">
+                        <h1>Error Loading Document</h1>
+                        <p>Could not load <code>${filename}</code></p>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Handle URL hash for direct linking
+        function handleHash() {
+            const hash = window.location.hash.slice(1);
+            if (hash) {
+                loadDoc(hash + '.md');
+            }
+        }
+
+        window.addEventListener('hashchange', handleHash);
+        window.addEventListener('load', handleHash);
+    </script>
+</body>
+</html>
+

@@ -34,6 +34,14 @@ services:
       - "4000:4000"
     restart: unless-stopped
 
+  # Documentation Site (publicly accessible)
+  docs-site:
+    build:
+      context: .
+      dockerfile: docs-site/Dockerfile.docs
+    image: paulandrewfarrow/monetizeplus-docs-site:latest
+    restart: unless-stopped
+
   # Publisher Dashboard
   publisher-dashboard:
     build:
@@ -43,6 +51,7 @@ services:
     depends_on:
       - licensing-api
       - urlparser
+      - docs-site
     ports:
       - "80:80"
     environment:
