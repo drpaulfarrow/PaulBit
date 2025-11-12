@@ -220,7 +220,7 @@ export default function Analytics({ publisherId }) {
             Ingestion Credentials
           </h3>
           <p className="text-sm text-gray-400 mt-2">
-            Use the hashed value below in the <code className="font-mono">X-PaulBit-Key</code> header when posting
+            Use the hashed value below in the <code className="font-mono">X-MAI-Monetize-Key</code> header when posting
             NDJSON payloads to <code className="font-mono">POST /api/logs/ingest</code>.
           </p>
           <div className="mt-4 grid gap-4 md:grid-cols-2">

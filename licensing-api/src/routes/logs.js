@@ -16,9 +16,9 @@ const MAX_BATCH_SIZE = parseInt(process.env.LOG_INGEST_MAX_BATCH || '500', 10);
  */
 router.post('/ingest', async (req, res) => {
   try {
-    const ingestKey = req.header('X-PaulBit-Key');
+    const ingestKey = req.header('X-MAI-Monetize-Key');
     if (!ingestKey) {
-      return res.status(401).json({ error: 'Missing ingestion key header (X-PaulBit-Key)' });
+      return res.status(401).json({ error: 'Missing ingestion key header (X-MAI-Monetize-Key)' });
     }
 
     const publisher = await Publisher.findByApiKey(ingestKey);
@@ -57,8 +57,8 @@ router.post('/ingest', async (req, res) => {
       return res.status(413).json({ error: `Batch exceeds maximum size of ${MAX_BATCH_SIZE}` });
     }
 
-    const sourceHint = req.header('X-PaulBit-Source') || req.query.source || 'unknown';
-    const sourceId = req.header('X-PaulBit-Source-Id') || req.query.source_id;
+    const sourceHint = req.header('X-MAI-Monetize-Source') || req.query.source || 'unknown';
+    const sourceId = req.header('X-MAI-Monetize-Source-Id') || req.query.source_id;
     const normalized = [];
 
     for (const record of records) {

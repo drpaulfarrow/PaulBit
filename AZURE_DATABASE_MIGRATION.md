@@ -2,7 +2,7 @@
 
 ## ✅ Migration Summary
 
-The PaulBit application has been migrated from **containerized PostgreSQL** to **Azure Database for PostgreSQL (Managed Service)**.
+The MAI Monetize application has been migrated from **containerized PostgreSQL** to **Azure Database for PostgreSQL (Managed Service)**.
 
 ## 🎯 Key Benefits
 

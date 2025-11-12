@@ -37,7 +37,7 @@ describe('logs routes', () => {
       const app = buildApp();
       const res = await request(app).post('/api/logs/ingest').send([]);
       expect(res.status).toBe(401);
-      expect(res.body).toEqual({ error: 'Missing ingestion key header (X-PaulBit-Key)' });
+      expect(res.body).toEqual({ error: 'Missing ingestion key header (X-MAI-Monetize-Key)' });
       expect(Publisher.findByApiKey).not.toHaveBeenCalled();
     });
 
@@ -47,7 +47,7 @@ describe('logs routes', () => {
 
       const res = await request(app)
         .post('/api/logs/ingest')
-        .set('X-PaulBit-Key', 'bad-key')
+        .set('X-MAI-Monetize-Key', 'bad-key')
         .send([]);
 
       expect(res.status).toBe(401);
@@ -60,7 +60,7 @@ describe('logs routes', () => {
 
       const res = await request(app)
         .post('/api/logs/ingest')
-        .set('X-PaulBit-Key', 'good-key')
+        .set('X-MAI-Monetize-Key', 'good-key')
         .send({ message: 'not an array' });
 
       expect(res.status).toBe(400);
@@ -74,7 +74,7 @@ describe('logs routes', () => {
       const payload = [{ timestamp: '2025-01-01T00:00:00Z' }, { timestamp: '2025-01-01T00:05:00Z' }, { timestamp: '2025-01-01T00:10:00Z' }];
       const res = await request(app)
         .post('/api/logs/ingest')
-        .set('X-PaulBit-Key', 'good-key')
+        .set('X-MAI-Monetize-Key', 'good-key')
         .send(payload);
 
       expect(res.status).toBe(413);
@@ -102,7 +102,7 @@ describe('logs routes', () => {
 
       const res = await request(app)
         .post('/api/logs/ingest')
-        .set('X-PaulBit-Key', 'valid-key')
+        .set('X-MAI-Monetize-Key', 'valid-key')
         .set('X-PaulBit-Source', 'fastly')
         .set('X-PaulBit-Source-Id', 'abc123')
         .send([entry]);

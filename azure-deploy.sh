@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-# curl -sS https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/azure-deploy.sh | bash
+# curl -sS https://raw.githubusercontent.com/drpaulfarrow/MAI-Monetize/main/azure-deploy.sh | bash
 # MonetizePlus Azure Deployment Script with Automatic Migrations
 # This script deploys MonetizePlus to Azure App Service with database migration support
 
@@ -71,7 +71,7 @@ echo ""
 
 # Step 5: Download docker-compose.azure.yml
 echo "📝 Step 5: Downloading docker-compose configuration..."
-curl -sS -O https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/docker-compose.azure.yml
+curl -sS -O https://raw.githubusercontent.com/drpaulfarrow/MAI-Monetize/main/docker-compose.azure.yml
 echo "✅ Configuration downloaded"
 echo ""
 

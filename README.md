@@ -94,6 +94,11 @@ All services should show as "Up" and healthy.
 
 ### Access Points
 
+- **📚 Documentation**: http://localhost/docs (✨ **NEW** - no password required!)
+  - Comprehensive browsable documentation
+  - All markdown files rendered as clean web pages
+  - Organized by category with navigation
+  - Publicly accessible (no authentication)
 - **Publisher Dashboard**: http://localhost/demo/ (password: `PCM2025!`)
   - Modern React SPA with password protection
   - White-label design with no product branding
@@ -147,7 +152,7 @@ The dashboard features a **modern, professional design** built with:
 ### Telemetry & Analytics
 
 - **Log Ingestion API**: `POST http://localhost:3000/api/logs/ingest`
-  - Authenticate with `X-PaulBit-Key`. For local sample data the raw key is `publisher-{id}-ingest`
+  - Authenticate with `X-MAI-Monetize-Key`. For local sample data the raw key is `publisher-{id}-ingest`
     (the API persists the SHA-256 hash).
   - Accepts NDJSON or JSON arrays from platforms such as Fastly, Cloudflare, and Akamai.
 - **Aggregated Metrics**: `/api/logs/summary` exposes hourly/daily rollups (`aggregated_metrics` table).
@@ -226,7 +231,7 @@ See `tests/MANUAL_TESTS.md` for detailed manual test cases and edge case scenari
 
 **One-Command Deploy:**
 ```bash
-curl -sS https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/azure-deploy.sh | bash
+curl -sS https://raw.githubusercontent.com/drpaulfarrow/MAI-Monetize/main/azure-deploy.sh | bash
 ```
 
 This automated script:

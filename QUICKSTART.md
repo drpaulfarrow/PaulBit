@@ -98,10 +98,10 @@ curl http://localhost:3000/admin/logs?limit=10 | ConvertFrom-Json
 ### Telemetry Ingestion (Optional)
 
 ```bash
-# Post NDJSON telemetry records (replace X-PaulBit-Key with publisher's hashed key)
+# Post NDJSON telemetry records (replace X-MAI Monetize-Key with publisher's hashed key)
 curl -X POST http://localhost:3000/api/logs/ingest \
   -H "Content-Type: application/json" \
-  -H "X-PaulBit-Key: <publisher-api-key>" \
+  -H "X-MAI Monetize-Key: <publisher-api-key>" \
   -d '[
     {
       "timestamp": "2025-01-01T12:00:00Z",

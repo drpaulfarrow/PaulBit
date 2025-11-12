@@ -60,7 +60,7 @@ Write-Host ""
 
 # Step 5: Download docker-compose.azure.yml
 Write-Host "📝 Step 5: Downloading docker-compose configuration..." -ForegroundColor Yellow
-curl.exe -sS -O https://raw.githubusercontent.com/drpaulfarrow/PaulBit/main/docker-compose.azure.yml
+curl.exe -sS -O https://raw.githubusercontent.com/drpaulfarrow/MAI-Monetize/main/docker-compose.azure.yml
 Write-Host "✅ Configuration downloaded" -ForegroundColor Green
 Write-Host ""
 

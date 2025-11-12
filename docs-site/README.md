@@ -1,8 +1,8 @@
-# PaulBit Documentation Site
+# MAI Monetize Documentation Site
 
 ## Overview
 
-This is a standalone documentation site that serves all PaulBit documentation as a clean, browsable web interface.
+This is a standalone documentation site that serves all MAI Monetize documentation as a clean, browsable web interface.
 
 ## Features
 
@@ -173,7 +173,7 @@ Example:
 
 ## License
 
-Same as main PaulBit project (MIT).
+Same as main MAI Monetize project (MIT).
 
 ---
 
