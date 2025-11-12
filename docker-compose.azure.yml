@@ -56,7 +56,7 @@ services:
     build:
       context: ./publisher-dashboard
       dockerfile: Dockerfile.azure
-    image: paulandrewfarrow/monetizeplus-publisher-dashboard:azure-20251111
+    image: paulandrewfarrow/monetizeplus-publisher-dashboard:azure-20251112
     depends_on:
       - licensing-api
       - urlparser
