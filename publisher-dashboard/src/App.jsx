@@ -5,6 +5,7 @@ import axios from 'axios';
 import Layout from './components/Layout';
 import GoogleLogin from './components/GoogleLogin';
 import PublisherSelector from './components/PublisherSelector';
+import PublisherOnboarding from './pages/PublisherOnboarding';
 import PasswordGate from './components/PasswordGate';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -104,20 +105,29 @@ function AppContent() {
       
       if (response.data.success) {
         setUser(response.data.user);
-        setPublishers(response.data.publishers);
         localStorage.setItem('sessionToken', response.data.token);
         setSessionToken(response.data.token);
         
-        // If user has only one publisher, auto-select it
-        if (response.data.publishers.length === 1) {
+        if (response.data.needsPublisherSetup) {
+          // User needs to create/select a publisher - stay on onboarding
+          setUser(response.data.user);
+        } else if (response.data.publishers && response.data.publishers.length === 1) {
+          // Auto-select if only one publisher
           setPublisherId(response.data.publishers[0].id);
           localStorage.setItem('publisherId', response.data.publishers[0].id.toString());
+        } else {
+          setPublishers(response.data.publishers);
         }
       }
     } catch (error) {
       console.error('Google login failed:', error);
       alert('Authentication failed. Please try again or contact support.');
     }
+  };
+
+  const handlePublisherOnboarding = (publisherId) => {
+    setPublisherId(publisherId);
+    localStorage.setItem('publisherId', publisherId.toString());
   };
 
   const handlePublisherSelect = (pubId) => {
@@ -166,6 +176,11 @@ function AppContent() {
     }
 
     if (!publisherId) {
+      // Check if user needs publisher setup (no publishers assigned)
+      if (!publishers || publishers.length === 0) {
+        return <PublisherOnboarding user={user} onComplete={handlePublisherOnboarding} />;
+      }
+      
       return (
         <PublisherSelector
           user={user}
