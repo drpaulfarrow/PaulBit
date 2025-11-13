@@ -86,8 +86,19 @@ router.post('/google', async (req, res) => {
     
     const user = userResult.rows[0];
     
-    // If user has no publisher, return setup flow
+    // If user has no publisher, return setup flow (but still provide session token!)
     if (!user.publisher_id) {
+      const sessionToken = jwt.sign(
+        {
+          userId: user.id,
+          email: user.email,
+          name: user.name,
+          googleId: googleId
+        },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      
       return res.json({
         success: true,
         user: {
@@ -96,6 +107,7 @@ router.post('/google', async (req, res) => {
           name: user.name,
           picture_url: user.picture_url
         },
+        token: sessionToken,
         needsPublisherSetup: true,
         message: 'Please create or select a publisher to continue'
       });
