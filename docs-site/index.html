@@ -47,6 +47,72 @@
             color: #94a3b8;
         }
 
+        .search-box {
+            padding: 1rem 1.5rem;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.625rem 1rem;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: #0f172a;
+        }
+
+        .search-input::placeholder {
+            color: #64748b;
+        }
+
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #0f172a;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+        }
+
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #1e293b;
+            transition: background 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: #1e293b;
+        }
+
+        .search-result-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #3b82f6;
+            margin-bottom: 0.25rem;
+        }
+
+        .search-result-snippet {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .search-highlight {
+            background: #fbbf24;
+            color: #000;
+            padding: 0 0.25rem;
+            border-radius: 2px;
+        }
+
         .nav-section {
             padding: 1rem 0;
             border-bottom: 1px solid #334155;
@@ -298,6 +364,17 @@
             <p>Content Licensing Gateway</p>
         </div>
 
+        <div class="search-box">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput"
+                placeholder="🔍 Search documentation..."
+                oninput="handleSearch(this.value)"
+            />
+            <div id="searchResults" class="search-results" style="display: none;"></div>
+        </div>
+
         <nav>
             <div class="nav-section">
                 <div class="nav-section-title">Getting Started</div>
@@ -311,6 +388,11 @@
                 <a class="nav-link" onclick="loadDoc('ARCHITECTURE.md')">🏗️ System Architecture</a>
                 <a class="nav-link" onclick="loadDoc('PROJECT_SUMMARY.md')">📋 Project Summary</a>
                 <a class="nav-link" onclick="loadDoc('DEVELOPMENT_WORKFLOW.md')">⚙️ Development Workflow</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Analytics & Telemetry</div>
+                <a class="nav-link" onclick="loadDoc('TELEMETRY_INTEGRATION_GUIDE.md')">📊 Telemetry Integration Guide</a>
             </div>
 
             <div class="nav-section">
@@ -471,6 +553,117 @@
 
         window.addEventListener('hashchange', handleHash);
         window.addEventListener('load', handleHash);
+
+        // Search functionality
+        const docFiles = [
+            { file: 'README.md', title: 'Overview & Quick Start', category: 'Getting Started' },
+            { file: 'QUICKSTART.md', title: 'Quick Start Guide', category: 'Getting Started' },
+            { file: 'QUICKSTART_AZURE.md', title: 'Azure Quick Start', category: 'Getting Started' },
+            { file: 'TELEMETRY_INTEGRATION_GUIDE.md', title: 'Telemetry Integration Guide', category: 'Analytics' },
+            { file: 'ARCHITECTURE.md', title: 'System Architecture', category: 'Architecture' },
+            { file: 'PROJECT_SUMMARY.md', title: 'Project Summary', category: 'Architecture' },
+            { file: 'DEVELOPMENT_WORKFLOW.md', title: 'Development Workflow', category: 'Architecture' },
+            { file: 'NEGOTIATION_ARCHITECTURE.md', title: 'Negotiation System', category: 'Features' },
+            { file: 'NEGOTIATION_SETUP.md', title: 'Negotiation Setup', category: 'Features' },
+            { file: 'NEGOTIATION_UI_GUIDE.md', title: 'Negotiation UI Guide', category: 'Features' },
+            { file: 'POLICY_FLOW.md', title: 'Policy Flow', category: 'Features' },
+            { file: 'URL_LIBRARY_SETUP.md', title: 'URL Library', category: 'Features' },
+            { file: 'API_REFERENCE_CM_RTBSPEC.md', title: 'API Reference', category: 'API' },
+            { file: 'ACCESS_ENDPOINTS_GUIDE.md', title: 'Access Endpoints Guide', category: 'API' },
+            { file: 'deploy.md', title: 'Deployment Guide', category: 'Deployment' },
+            { file: 'DEV_VS_AZURE_DEPLOYMENT.md', title: 'Dev vs Azure', category: 'Deployment' },
+            { file: 'AZURE_DATABASE_MIGRATION.md', title: 'Database Migration', category: 'Deployment' },
+            { file: 'UI_TEST_README.md', title: 'UI Testing', category: 'Testing' },
+            { file: 'GOOGLE_AUTH_SETUP.md', title: 'Google Auth Setup', category: 'Authentication' },
+        ];
+
+        let searchCache = {};
+
+        async function handleSearch(query) {
+            const searchResults = document.getElementById('searchResults');
+            
+            if (!query || query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            query = query.toLowerCase();
+            const results = [];
+
+            // Search in titles first
+            for (const doc of docFiles) {
+                if (doc.title.toLowerCase().includes(query) || doc.category.toLowerCase().includes(query)) {
+                    results.push({
+                        file: doc.file,
+                        title: doc.title,
+                        category: doc.category,
+                        snippet: `${doc.category} - ${doc.title}`,
+                        score: 10
+                    });
+                }
+            }
+
+            // Search in content (cached)
+            for (const doc of docFiles) {
+                if (!searchCache[doc.file]) {
+                    try {
+                        const response = await fetch(`${BASE_URL}/docs-content/${doc.file}`);
+                        if (response.ok) {
+                            searchCache[doc.file] = await response.text();
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+
+                const content = searchCache[doc.file];
+                if (content && content.toLowerCase().includes(query)) {
+                    const index = content.toLowerCase().indexOf(query);
+                    const snippet = content.substring(Math.max(0, index - 50), Math.min(content.length, index + 100));
+                    
+                    if (!results.find(r => r.file === doc.file)) {
+                        results.push({
+                            file: doc.file,
+                            title: doc.title,
+                            category: doc.category,
+                            snippet: snippet,
+                            score: 5
+                        });
+                    }
+                }
+            }
+
+            // Sort by score
+            results.sort((a, b) => b.score - a.score);
+
+            // Render results
+            if (results.length > 0) {
+                searchResults.innerHTML = results.slice(0, 10).map(result => `
+                    <div class="search-result-item" onclick="loadDoc('${result.file}'); document.getElementById('searchInput').value = '';">
+                        <div class="search-result-title">${highlightQuery(result.title, query)}</div>
+                        <div class="search-result-snippet">${highlightQuery(result.snippet, query)}</div>
+                    </div>
+                `).join('');
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                searchResults.style.display = 'block';
+            }
+        }
+
+        function highlightQuery(text, query) {
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            const searchBox = document.querySelector('.search-box');
+            const searchResults = document.getElementById('searchResults');
+            if (!searchBox.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
