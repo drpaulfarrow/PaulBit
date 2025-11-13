@@ -7,10 +7,7 @@ services:
 
   # Licensing API - authentication, tokens, metering, policies
   licensing-api:
-    build:
-      context: ./licensing-api
-      dockerfile: Dockerfile
-    image: paulandrewfarrow/monetizeplus-licensing-api:latest
+    image: paulandrewfarrow/monetizeplus-licensing-api:azure-20251113
     depends_on:
       - urlparser
     environment:
@@ -38,19 +35,11 @@ services:
 
   # Documentation Site (publicly accessible)
   docs-site:
-    build:
-      context: .
-      dockerfile: docs-site/Dockerfile.docs
     image: paulandrewfarrow/monetizeplus-docs-site:latest
     restart: unless-stopped
 
   # Publisher Dashboard
   publisher-dashboard:
-    build:
-      context: ./publisher-dashboard
-      dockerfile: Dockerfile.azure
-      args:
-        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
     image: paulandrewfarrow/monetizeplus-publisher-dashboard:azure-20251112
     depends_on:
       - licensing-api

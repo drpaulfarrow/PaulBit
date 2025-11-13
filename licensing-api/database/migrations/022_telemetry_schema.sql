@@ -1,10 +1,7 @@
 -- Migration 022: Telemetry & Analytics foundation schema
 -- Adds ingestion, aggregation, and alerting tables plus supporting columns.
 
--- Ensure pgcrypto is available for hashing helpers
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
--- 1. Publishers enrichment
+-- 1. Publishers enrichment (Azure-compatible - no pgcrypto extension)
 ALTER TABLE publishers
   ADD COLUMN IF NOT EXISTS contact_email VARCHAR(255),
   ADD COLUMN IF NOT EXISTS api_key_hash VARCHAR(255),
@@ -19,9 +16,9 @@ SET plan_id = COALESCE(
 )
 WHERE plan_id IS NULL;
 
--- Backfill api_key_hash placeholders for existing publishers
+-- Backfill api_key_hash placeholders for existing publishers (simple concatenation for Azure compatibility)
 UPDATE publishers
-SET api_key_hash = encode(digest(CONCAT('publisher-', id, '-ingest'), 'sha256'), 'hex')
+SET api_key_hash = 'publisher-' || id || '-ingest-hash'
 WHERE api_key_hash IS NULL;
 
 -- Add uniqueness & lookup indexes

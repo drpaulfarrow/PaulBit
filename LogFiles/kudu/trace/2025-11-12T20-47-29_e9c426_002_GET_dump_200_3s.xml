@@ -1,0 +1,6 @@
+<step title="Incoming Request" date="2025-11-12T20:47:29.862" instance="e9c426" url="/dump" method="GET" type="request" pid="767,1,16" Host="monetizeplusapp-e2ecbddxfjh0djey.scm.westeurope-01.azurewebsites.net" User-Agent="AZURECLI/2.67.0 (HOMEBREW)" Accept-Encoding="identity" Authorization="Bea..." x-ms-client-request-id="c981d63c-c008-11f0-b8f2-8615ec3ff6d3" X-ARR-LOG-ID="c981d63c-c008-11f0-b8f2-8615ec3ff6d3" CLIENT-IP="90.198.122.156:55060" X-SITE-DEPLOYMENT-ID="monetizeplusapp" WAS-DEFAULT-HOSTNAME="monetizeplusapp-e2ecbddxfjh0djey.scm.westeurope-01.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/dump" X-Client-IP="90.198.122.156" X-Client-Port="55060" >
+  <step title="Cleanup Xml Logs" date="2025-11-12T20:47:29.865" >
+    <step title="Cleanup Infos" date="2025-11-12T20:47:29.873" totalFiles="214" totalCleanup="54" /><!-- duration: 3ms -->
+  </step><!-- duration: 13ms -->
+  <step title="Outgoing response" date="2025-11-12T20:47:32.363" type="response" statusCode="200" statusText="OK" /><!-- duration: 3ms -->
+</step><!-- duration: 2505ms -->

@@ -1,0 +1,6 @@
+<step title="Incoming Request" date="2025-10-30T09:18:15.804" instance="e9c426" url="/logstream" method="GET" type="request" pid="768,1,5" Host="monetizeplusapp-e2ecbddxfjh0djey.scm.westeurope-01.azurewebsites.net" User-Agent="AZURECLI/2.76.0 (RPM)" Accept-Encoding="identity" Authorization="Bea..." x-ms-client-request-id="1352456e-b571-11f0-955f-00155decf0ab" X-ARR-LOG-ID="1352456e-b571-11f0-955f-00155decf0ab" CLIENT-IP="172.201.33.160:4338" X-SITE-DEPLOYMENT-ID="monetizeplusapp" WAS-DEFAULT-HOSTNAME="monetizeplusapp-e2ecbddxfjh0djey.scm.westeurope-01.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/logstream" X-Client-IP="172.201.33.160" X-Client-Port="4338" >
+  <step title="Cleanup Xml Logs" date="2025-10-30T09:18:15.806" /><!-- duration: 4ms -->
+  <step title="LogStreamHandlerMiddleware.Invoke" date="2025-10-30T09:18:15.814" /><!-- duration: 33ms -->
+  <step title="Error occurred" date="2025-10-30T09:21:15.846" type="error" text="LogStreamManager: ProcessRequest end" /><!-- duration: 4ms -->
+  <step title="Outgoing response" date="2025-10-30T09:21:15.855" type="response" statusCode="200" statusText="OK" /><!-- duration: 2ms -->
+</step><!-- duration: 180055ms -->

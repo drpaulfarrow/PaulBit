@@ -1,0 +1,6 @@
+<step title="Incoming Request" date="2025-11-12T20:47:48.234" instance="e9c426" url="/api/settings" method="GET" type="request" pid="767,1,14" Accept="*/*" Host="monetizeplusapp-e2ecbddxfjh0djey.scm.westeurope-01.azurewebsites.net" User-Agent="AZURECLI/2.67.0 (HOMEBREW)" Accept-Encoding="gzip, deflate" Authorization="Bea..." x-ms-client-request-id="d0c0ed34-c008-11f0-a630-8615ec3ff6d3" X-ARR-LOG-ID="d0c0ed34-c008-11f0-a630-8615ec3ff6d3" CLIENT-IP="90.198.122.156:55154" X-SITE-DEPLOYMENT-ID="monetizeplusapp" WAS-DEFAULT-HOSTNAME="monetizeplusapp-e2ecbddxfjh0djey.scm.westeurope-01.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/api/settings" X-Client-IP="90.198.122.156" X-Client-Port="55154" >
+  <step title="Cleanup Xml Logs" date="2025-11-12T20:47:48.236" >
+    <step title="Cleanup Infos" date="2025-11-12T20:47:48.243" totalFiles="215" totalCleanup="55" /><!-- duration: 4ms -->
+  </step><!-- duration: 13ms -->
+  <step title="Outgoing response" date="2025-11-12T20:47:48.260" type="response" statusCode="200" statusText="OK" /><!-- duration: 3ms -->
+</step><!-- duration: 31ms -->
