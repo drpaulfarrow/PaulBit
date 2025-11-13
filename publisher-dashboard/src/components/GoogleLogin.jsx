@@ -16,20 +16,22 @@ export default function GoogleLogin({ onLogin }) {
           </p>
         </div>
 
-        <div className="space-y-4">
-          <GoogleOAuthButton
-            onSuccess={onLogin}
-            onError={() => {
-              console.error('Google Login Failed');
-              alert('Google authentication failed. Please try again.');
-            }}
-            theme="filled_black"
-            size="large"
-            text="signin_with"
-            shape="rectangular"
-            logo_alignment="left"
-            width="100%"
-          />
+        <div style={{display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center'}}>
+          <div style={{width: '400px', maxWidth: '100%'}}>
+            <GoogleOAuthButton
+              onSuccess={onLogin}
+              onError={() => {
+                console.error('Google Login Failed');
+                alert('Google authentication failed. Please try again.');
+              }}
+              theme="filled_black"
+              size="large"
+              text="signin_with"
+              shape="rectangular"
+              logo_alignment="left"
+              width="400"
+            />
+          </div>
           
           <div className="relative">
             <div className="absolute inset-0 flex items-center">

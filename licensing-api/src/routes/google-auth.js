@@ -139,9 +139,9 @@ router.post('/google', async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        avatar: user.avatar_url
+        avatar: user.picture_url
       },
-      publishers: publishersResult.rows,
+      publishers: publisherResult.rows,
       token: sessionToken
     });
     

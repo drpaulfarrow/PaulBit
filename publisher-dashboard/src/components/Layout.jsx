@@ -20,8 +20,34 @@ import { LICENSING_API as API_URL } from '../utils/apiConfig';
 export default function Layout({ children, publisherId, onLogout }) {
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [publisher, setPublisher] = useState(null);
+  const [showPublisherMenu, setShowPublisherMenu] = useState(false);
 
   const isActive = (path) => location.pathname === path;
+
+  // Load publisher info
+  useEffect(() => {
+    async function loadPublisher() {
+      try {
+        const response = await fetch(`${API_URL}/api/publishers/${publisherId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setPublisher({
+            id: data.publisher_id,
+            name: data.name,
+            hostname: data.hostname,
+            email: data.contact_email
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load publisher:', error);
+      }
+    }
+
+    if (publisherId) {
+      loadPublisher();
+    }
+  }, [publisherId]);
 
   // Load unread notifications count
   useEffect(() => {
@@ -52,13 +78,23 @@ export default function Layout({ children, publisherId, onLogout }) {
       {/* Header */}
       <header className="bg-white shadow">
         <div className="px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <Link to="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Segoe UI, sans-serif' }}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+            <Link to="/dashboard" style={{display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', transition: 'opacity 0.2s'}}>
+              <h1 style={{fontSize: '1.5rem', fontWeight: '700', color: '#111827', fontFamily: 'Segoe UI, sans-serif'}}>
                 Dashboard
               </h1>
             </Link>
-            <span className="text-sm text-gray-500">Account #{publisherId}</span>
+            {publisher ? (
+              <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)', borderRadius: '0.5rem', border: '1px solid #d1d5db'}}>
+                <div style={{width: '8px', height: '8px', background: '#10b981', borderRadius: '50%'}}></div>
+                <div>
+                  <div style={{fontSize: '0.875rem', fontWeight: '600', color: '#111827'}}>{publisher.name}</div>
+                  <div style={{fontSize: '0.75rem', color: '#6b7280'}}>{publisher.hostname}</div>
+                </div>
+              </div>
+            ) : (
+              <span style={{fontSize: '0.875rem', color: '#6b7280'}}>Loading...</span>
+            )}
           </div>
           <button
             onClick={onLogout}
