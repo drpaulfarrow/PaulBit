@@ -27,23 +27,28 @@ export default function PublisherOnboarding({ user, onComplete }) {
     setError('');
 
     try {
+      // Get session token
+      const sessionToken = localStorage.getItem('sessionToken');
+      const headers = sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {};
+
       // Create new publisher
       const publisherResponse = await axios.post('/api/publishers', {
         name: formData.name,
         hostname: formData.hostname,
         contact_email: user.email
-      });
+      }, { headers });
 
       const publisher = publisherResponse.data.publisher;
 
       // Link user to publisher
       await axios.post('/api/auth/google/link-publisher', {
         publisher_id: publisher.id
-      });
+      }, { headers });
 
       onComplete(publisher.id);
     } catch (error) {
-      setError(error.response?.data?.error || 'Failed to create publisher');
+      setError(error.response?.data?.error || error.response?.data?.message || 'Failed to create publisher');
+      console.error('Publisher creation error:', error.response?.data);
     } finally {
       setLoading(false);
     }
@@ -52,12 +57,17 @@ export default function PublisherOnboarding({ user, onComplete }) {
   const handleSelectPublisher = async (publisherId) => {
     setLoading(true);
     try {
+      const sessionToken = localStorage.getItem('sessionToken');
+      const headers = sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {};
+      
       await axios.post('/api/auth/google/link-publisher', {
         publisher_id: publisherId
-      });
+      }, { headers });
+      
       onComplete(publisherId);
     } catch (error) {
-      setError('Failed to link to publisher');
+      setError(error.response?.data?.error || 'Failed to link to publisher');
+      console.error('Publisher link error:', error.response?.data);
     } finally {
       setLoading(false);
     }
@@ -69,15 +79,19 @@ export default function PublisherOnboarding({ user, onComplete }) {
     setError('');
 
     try {
+      const sessionToken = localStorage.getItem('sessionToken');
+      const headers = sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {};
+      
       await axios.post('/api/auth/google/request-publisher', {
         requested_name: formData.name,
         requested_hostname: formData.hostname,
         business_description: formData.description
-      });
+      }, { headers });
       
       setStep('request-submitted');
     } catch (error) {
       setError(error.response?.data?.error || 'Failed to submit request');
+      console.error('Publisher request error:', error.response?.data);
     } finally {
       setLoading(false);
     }
@@ -114,41 +128,83 @@ export default function PublisherOnboarding({ user, onComplete }) {
         </div>
 
         {step === 'choose' && (
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem'}}>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
             <button
               onClick={() => { loadExistingPublishers(); setStep('select'); }}
-              style={{padding: '2rem 1rem', border: '1px solid #4b5563', borderRadius: '0.5rem', background: '#1f2937', cursor: 'pointer'}}
-              onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.background = '#1e3a5f';}}
-              onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#4b5563'; e.currentTarget.style.background = '#1f2937';}}
+              style={{
+                width: '100%',
+                padding: '1.5rem',
+                border: '2px solid #3b82f6',
+                borderRadius: '0.75rem',
+                background: 'rgba(59, 130, 246, 0.1)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)'; e.currentTarget.style.transform = 'translateY(-2px)';}}
+              onMouseLeave={(e) => {e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)'; e.currentTarget.style.transform = 'translateY(0)';}}
             >
-              <svg style={{width: '3rem', height: '3rem', margin: '0 auto 1rem', color: '#60a5fa'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg style={{width: '2.5rem', height: '2.5rem', color: '#60a5fa', flexShrink: 0}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <div style={{fontSize: '1.125rem', fontWeight: '600', color: 'white'}}>Join Existing</div>
+              <div style={{textAlign: 'left', flex: 1}}>
+                <div style={{fontSize: '1.25rem', fontWeight: '600', color: 'white', marginBottom: '0.25rem'}}>Join Existing Publisher</div>
+                <div style={{fontSize: '0.875rem', color: '#9ca3af'}}>Connect to an existing publisher account</div>
+              </div>
             </button>
 
             <button
               onClick={() => setStep('create')}
-              style={{padding: '2rem 1rem', border: '1px solid #4b5563', borderRadius: '0.5rem', background: '#1f2937', cursor: 'pointer'}}
-              onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#10b981'; e.currentTarget.style.background = '#1e4d3d';}}
-              onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#4b5563'; e.currentTarget.style.background = '#1f2937';}}
+              style={{
+                width: '100%',
+                padding: '1.5rem',
+                border: '2px solid #10b981',
+                borderRadius: '0.75rem',
+                background: 'rgba(16, 185, 129, 0.1)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(16, 185, 129, 0.2)'; e.currentTarget.style.transform = 'translateY(-2px)';}}
+              onMouseLeave={(e) => {e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)'; e.currentTarget.style.transform = 'translateY(0)';}}
             >
-              <svg style={{width: '3rem', height: '3rem', margin: '0 auto 1rem', color: '#34d399'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg style={{width: '2.5rem', height: '2.5rem', color: '#34d399', flexShrink: 0}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <div style={{fontSize: '1.125rem', fontWeight: '600', color: 'white'}}>Create New</div>
+              <div style={{textAlign: 'left', flex: 1}}>
+                <div style={{fontSize: '1.25rem', fontWeight: '600', color: 'white', marginBottom: '0.25rem'}}>Create New Publisher</div>
+                <div style={{fontSize: '0.875rem', color: '#9ca3af'}}>Set up a new publisher instantly</div>
+              </div>
             </button>
 
             <button
               onClick={() => setStep('request')}
-              style={{padding: '2rem 1rem', border: '1px solid #4b5563', borderRadius: '0.5rem', background: '#1f2937', cursor: 'pointer'}}
-              onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#8b5cf6'; e.currentTarget.style.background = '#3730a3';}}
-              onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#4b5563'; e.currentTarget.style.background = '#1f2937';}}
+              style={{
+                width: '100%',
+                padding: '1.5rem',
+                border: '2px solid #8b5cf6',
+                borderRadius: '0.75rem',
+                background: 'rgba(139, 92, 246, 0.1)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)'; e.currentTarget.style.transform = 'translateY(-2px)';}}
+              onMouseLeave={(e) => {e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)'; e.currentTarget.style.transform = 'translateY(0)';}}
             >
-              <svg style={{width: '3rem', height: '3rem', margin: '0 auto 1rem', color: '#a78bfa'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg style={{width: '2.5rem', height: '2.5rem', color: '#a78bfa', flexShrink: 0}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <div style={{fontSize: '1.125rem', fontWeight: '600', color: 'white'}}>Request Access</div>
+              <div style={{textAlign: 'left', flex: 1}}>
+                <div style={{fontSize: '1.25rem', fontWeight: '600', color: 'white', marginBottom: '0.25rem'}}>Request Publisher Access</div>
+                <div style={{fontSize: '0.875rem', color: '#9ca3af'}}>Submit a request for admin approval</div>
+              </div>
             </button>
           </div>
         )}

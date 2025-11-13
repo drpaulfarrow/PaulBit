@@ -103,8 +103,8 @@ describe('logs routes', () => {
       const res = await request(app)
         .post('/api/logs/ingest')
         .set('X-MAI-Monetize-Key', 'valid-key')
-        .set('X-PaulBit-Source', 'fastly')
-        .set('X-PaulBit-Source-Id', 'abc123')
+        .set('X-MAI-Monetize-Source', 'fastly')
+        .set('X-MAI-Monetize-Source-Id', 'abc123')
         .send([entry]);
 
       expect(res.status).toBe(200);
@@ -122,7 +122,7 @@ describe('logs routes', () => {
         agentType: 'bot',
         country: 'US',
         latencyMs: 123.4,
-        source: 'fastly',
+        source: 'fastly', // Source from header
       });
       expect(normalized.rawPayload).toEqual(entry);
       expect(LogSource.touchLastIngested).toHaveBeenCalledWith('abc123');
